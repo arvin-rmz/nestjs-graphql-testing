@@ -1,0 +1,33 @@
+type Pet {
+  id: Int!
+  name: String!
+}
+
+input CreatePetInput {
+  name: String!
+}
+
+input UpdatePetInput {
+  id: Int!
+  name: String!
+}
+
+type UserErrors {
+  message: String!
+}
+
+type PetPayload {
+  userErrors: [UserErrors!]!
+  Pet: Pet
+}
+
+type Query {
+  pets: [Pet]!
+  pet(id: Int!): Pet
+}
+
+type Mutation {
+  createPet(createPetInput: CreatePetInput!): PetPayload!
+  updatePet(updatePetInput: UpdatePetInput!): PetPayload!
+  removePet(id: Int!): PetPayload
+}

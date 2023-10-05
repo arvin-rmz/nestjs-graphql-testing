@@ -1,0 +1,26 @@
+type Tokens {
+  accessToken: String
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input SignupInput {
+  email: String!
+  password: String!
+  firstName: String!
+  lastName: String
+}
+
+type LoginPayload {
+  userErrors: [UserErrors!]!
+  tokens: Tokens
+  user: User
+}
+
+type Mutation {
+  login(loginInput: LoginInput): LoginPayload!
+  signup(signupInput: SignupInput): LoginPayload!
+}

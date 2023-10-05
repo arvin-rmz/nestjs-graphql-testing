@@ -1,0 +1,36 @@
+type User {
+  id: Int!
+  firstName: String!
+  lastName: String
+  email: String!
+}
+
+input CreateUserInput {
+  firstName: String!
+  lastName: String
+  email: String!
+  password: String!
+}
+
+input FindUserInput {
+  email: String!
+}
+
+type UserErrors {
+  message: String!
+}
+
+type UsersPayload {
+  userErrors: [UserErrors!]!
+  users: [User]
+}
+
+type UserPayload {
+  userErrors: [UserErrors!]!
+  user: User
+}
+
+type Query {
+  users: UsersPayload!
+  user(findUserInput: FindUserInput): UserPayload!
+}

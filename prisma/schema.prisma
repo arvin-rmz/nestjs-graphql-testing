@@ -1,0 +1,88 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Image {
+  id         Int       @id @default(autoincrement())
+  url        String
+  postId     Int
+  post       Post      @relation(fields: [postId], references: [id])
+  profileId  Int       @unique
+  profile    Profile   @relation(fields: [profileId], references: [id])
+  video      Video?
+}
+
+model Video {
+  id             Int       @id @default(autoincrement())
+  url            String
+  coverImageId   Int       @unique
+  coverImage     Image     @relation(fields: [coverImageId], references: [id])
+  postId         Int       @unique
+  post           Post      @relation(fields: [postId], references: [id])
+}
+
+model Pet {
+  id          Int           @id @default(autoincrement())
+  name        String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+model Post {
+  id          Int           @id @default(autoincrement())
+  title       String
+  content     String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  images      Image[]
+  userId      Int
+  user        User          @relation(fields: [userId], references: [id])
+  video       Video?
+
+}
+
+model User {
+  id          Int           @id @default(autoincrement())
+  firstName   String
+  lastName    String?
+  email       String        @unique()
+  password    String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  posts       Post[]
+  profile     Profile?
+  courses    Course[]  
+}
+
+model Profile {
+  id          Int        @id @default(autoincrement())
+  bio         String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  userId      Int        @unique
+  user        User       @relation(fields: [userId], references: [id])
+  image       Image?
+}
+
+model Creator {
+  id        Int         @id @default(autoincrement())
+  courses   Course[]
+}
+
+model Course {
+  id          Int       @id @default(autoincrement())
+  name String
+  description String
+  users       User[]   
+  creatorId   Int 
+  creator     Creator   @relation(fields: [creatorId], references: [id])
+}
+
+
