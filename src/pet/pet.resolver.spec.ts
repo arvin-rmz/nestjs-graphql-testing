@@ -1,34 +1,26 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
-import { CreatePetInput, UpdatePetInput } from 'src/graphql';
+import { Test, TestingModule } from '@nestjs/testing';
+import { PetResolver } from './pet.resolver';
 import { PetService } from './pet.service';
 
-@Resolver('Pet')
-export class PetResolver {
-  constructor(private readonly petService: PetService) {}
+describe('PetResolver', () => {
+  let resolver: PetResolver;
+  const petService = {};
 
-  @Mutation('createPet')
-  create(@Args('createPetInput') createPetInput: CreatePetInput) {
-    return this.petService.create(createPetInput);
-  }
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        PetResolver,
+        {
+          provide: PetService,
+          useValue: petService,
+        },
+      ],
+    }).compile();
 
-  @Query('pets')
-  findAll() {
-    console.log('first');
-    return this.petService.findAll();
-  }
+    resolver = module.get<PetResolver>(PetResolver);
+  });
 
-  @Query('pet')
-  findOne(@Args('id') id: number) {
-    return this.petService.findOne(id);
-  }
-
-  @Mutation('updatePet')
-  update(@Args('updatePetInput') updatePetInput: UpdatePetInput) {
-    return this.petService.update(updatePetInput.id, updatePetInput);
-  }
-
-  @Mutation('removePet')
-  remove(@Args('id') id: number) {
-    return this.petService.remove(id);
-  }
-}
+  it('should be defined', () => {
+    expect(resolver).toBeDefined();
+  });
+});

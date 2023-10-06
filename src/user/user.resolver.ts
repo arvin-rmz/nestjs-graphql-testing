@@ -15,9 +15,9 @@ export class UserResolver {
     return this.userService.findAll();
   }
 
-  @Query('user')
-  @UseGuards(JwtAuthGuard)
-  findOne(@Args('findUserInput') findUserInput: FindUserInputDTO) {
-    return this.userService.findOne(findUserInput.email);
-  }
+  // @Query('user')
+  // @UseGuards(JwtAuthGuard)
+  // findOne(@Args('findUserInput') findUserInput: FindUserInputDTO) {
+  //   return this.userService.findOne(findUserInput.email);
+  // }
 }

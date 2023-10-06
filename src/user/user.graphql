@@ -16,8 +16,15 @@ input FindUserInput {
   email: String!
 }
 
+type OriginalError {
+  message: String
+  error: String
+  statusCode: Int
+}
+
 type UserErrors {
   message: String!
+  error: OriginalError
 }
 
 type UsersPayload {

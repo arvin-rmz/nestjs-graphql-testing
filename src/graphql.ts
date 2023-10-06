@@ -76,6 +76,7 @@ export class Pet {
 
 export class UserErrors {
     message: string;
+    error?: Nullable<OriginalError>;
 }
 
 export class PetPayload {
@@ -110,6 +111,12 @@ export class User {
     firstName: string;
     lastName?: Nullable<string>;
     email: string;
+}
+
+export class OriginalError {
+    message?: Nullable<string>;
+    error?: Nullable<string>;
+    statusCode?: Nullable<number>;
 }
 
 export class UsersPayload {

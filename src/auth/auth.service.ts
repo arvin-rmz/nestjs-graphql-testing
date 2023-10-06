@@ -1,11 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { LoginPayload } from 'src/graphql';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
+
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LoginInputDTO } from './dto/login.input.dto';
-import { JwtService } from '@nestjs/jwt';
 import { SignupInputDTO } from './dto/signup.input.dto';
 import { UserService } from 'src/user/user.service';
-import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -17,7 +18,6 @@ export class AuthService {
 
   async validateUser(email: string, password: string) {
     const user = await this.prismaService.user.findUnique({ where: { email } });
-
     if (!user) return null;
 
     const validPassword = await bcrypt.compare(password, user.password);
@@ -31,33 +31,45 @@ export class AuthService {
   }
 
   async login(loginInput: LoginInputDTO): Promise<LoginPayload> {
-    const user = await this.validateUser(loginInput.email, loginInput.password);
+    try {
+      const user = await this.validateUser(
+        loginInput.email,
+        loginInput.password,
+      );
 
-    const jwt = this.jwtService.sign({ email: user.email, sub: user.id });
+      if (!user) throw new UnauthorizedException('Invalid email or password');
 
-    return {
-      userErrors: [],
-      tokens: {
-        accessToken: jwt,
-      },
-      user,
-    };
+      const jwt = this.jwtService.sign({ email: user.email, sub: user.id });
+      return {
+        userErrors: [],
+        tokens: {
+          accessToken: jwt,
+        },
+        user,
+      };
+    } catch (error) {}
   }
 
-  async signup({ email, password, firstName, lastName }: SignupInputDTO) {
+  async signup({
+    email,
+    password,
+    firstName,
+    lastName,
+  }: SignupInputDTO): Promise<LoginPayload> {
     const hashedPassword = await bcrypt.hash(password, 12);
-    const { user } = await this.userService.create({
+
+    const res = await this.userService.create({
       email,
       password: hashedPassword,
       firstName,
       lastName,
     });
 
-    const accessToken = this.jwtService.sign({ email, sub: user.id });
+    const accessToken = this.jwtService.sign({ email, sub: res.user.id });
 
     return {
       userErrors: [],
-      user,
+      user: res.user,
       tokens: {
         accessToken,
       },
