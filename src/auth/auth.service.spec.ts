@@ -5,6 +5,7 @@ import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { LoginPayload, UserPayload } from 'src/graphql';
 import * as bcrypt from 'bcrypt';
+import { UnauthorizedException } from '@nestjs/common';
 
 jest.mock('bcrypt', () => {
   return {
@@ -108,11 +109,19 @@ describe('AuthService', () => {
     });
 
     it('should not provide password field in login payload', async () => {
-      const response = await service.login({
-        email: 'john@example.com',
-        password: 'password',
-      });
+      const response = await service.login(mockUserToLogin);
       expect(response.user).not.toHaveProperty('password');
+    });
+
+    it('should throw unauthorized error when login input in not valid', async () => {
+      jest.spyOn(bcrypt, 'compare').mockImplementation(() => false);
+
+      await expect(
+        service.login({
+          email: mockUserToLogin.email,
+          password: 'invalidPassword',
+        }),
+      ).rejects.toThrowError(UnauthorizedException);
     });
   });
 
