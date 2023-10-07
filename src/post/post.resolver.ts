@@ -1,13 +1,56 @@
-import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import {
+  Args,
+  Mutation,
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+} from '@nestjs/graphql';
 import { PostService } from './post.service';
 import { PostCreateInputDTO } from './dto/post-create-input';
+import { UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth-guard';
+import { CurrentUser } from 'src/user/decorators/current-user.decorator';
+import { Post } from 'src/graphql';
+import { UserService } from 'src/user/user.service';
+import { IJwtPayload } from 'src/auth/strategies/jwt.strategy';
+
+interface IGetUserParent extends Post {
+  userId: string;
+}
 
 @Resolver('Post')
 export class PostResolver {
-  constructor(private readonly postService: PostService) {}
+  constructor(
+    private readonly postService: PostService,
+    private readonly userService: UserService,
+  ) {}
 
   @Mutation('postCreate')
-  create(@Args('postCreateInput') postCreateInput: PostCreateInputDTO) {
-    return this.postService.create(postCreateInput);
+  @UseGuards(JwtAuthGuard)
+  create(
+    @Args('postCreateInput') postCreateInput: PostCreateInputDTO,
+    @CurrentUser() currentUser: IJwtPayload,
+  ) {
+    const currentUserId = Number(currentUser.sub);
+
+    return this.postService.create(postCreateInput, currentUserId);
+  }
+
+  @Query('post')
+  findOne(@Args('id') id: string) {
+    return this.postService.findOne(Number(id));
+  }
+
+  @Query('posts')
+  findAll() {
+    return this.postService.findAll();
+  }
+
+  @ResolveField('user')
+  async getUser(@Parent() { userId }: IGetUserParent) {
+    const { user } = await this.userService.findOne(Number(userId));
+
+    return user;
   }
 }

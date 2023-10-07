@@ -1,9 +1,9 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsEmail } from 'class-validator';
+import { IsEmail, IsNumber, IsString } from 'class-validator';
 
 @InputType('FindUserInput')
 export class FindUserInputDTO {
   @Field()
-  @IsEmail()
-  email: string;
+  @IsString()
+  id: string;
 }

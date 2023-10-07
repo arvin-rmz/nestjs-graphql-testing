@@ -13,6 +13,7 @@ import { UserModule } from './user/user.module';
 import { PostModule } from './post/post.module';
 import { AuthModule } from './auth/auth.module';
 import { UserService } from './user/user.service';
+import { ProfileModule } from './profile/profile.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { UserService } from './user/user.service';
     UserModule,
     PostModule,
     AuthModule,
+    ProfileModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService, UserService],

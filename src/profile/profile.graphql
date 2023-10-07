@@ -1,0 +1,34 @@
+type Profile {
+  id: ID!
+  userId: Int!
+  user: User!
+}
+
+input CreateProfileInput {
+  id: ID
+}
+
+input UpdateProfileInput {
+  id: ID!
+}
+
+type ProfilePayload {
+  userErrors: [UserErrors!]!
+  profile: Profile
+}
+
+type ProfilesPayload {
+  userErrors: [UserErrors!]!
+  profiles: [Profile!]!
+}
+
+type Query {
+  profile(id: ID!): ProfilePayload!
+  profiles: ProfilesPayload!
+}
+
+type Mutation {
+  createProfile(createProfileInput: CreateProfileInput!): Profile!
+  updateProfile(updateProfileInput: UpdateProfileInput!): Profile!
+  removeProfile(id: Int!): Profile
+}

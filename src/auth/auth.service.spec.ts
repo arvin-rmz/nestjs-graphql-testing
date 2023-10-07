@@ -15,7 +15,6 @@ jest.mock('bcrypt', () => {
 });
 
 const mockUser: {
-  id: number;
   firstName: string;
   lastName?: string;
   email: string;
@@ -23,7 +22,6 @@ const mockUser: {
   createdAt: Date;
   updatedAt: Date;
 } = {
-  id: 1,
   firstName: 'John',
   lastName: 'Smith',
   email: 'john@example.com',
@@ -105,7 +103,6 @@ describe('AuthService', () => {
       expect(response.user.email).toBeDefined();
       expect(response.user.firstName).toBeDefined();
       expect(response.user.lastName).toBeDefined();
-      expect(response.user.id).toBeDefined();
     });
 
     it('should not provide password field in login payload', async () => {
@@ -148,7 +145,6 @@ describe('AuthService', () => {
       });
 
       expect(jwtService.sign).toBeCalledWith({
-        sub: mockUser.id,
         email: getUserToSignup().email,
       });
     });
@@ -168,7 +164,6 @@ describe('AuthService', () => {
       expect(response.user.email).toBeDefined();
       expect(response.user.firstName).toBeDefined();
       expect(response.user.lastName).toBeDefined();
-      expect(response.user.id).toBeDefined();
     });
 
     it('should not include password in response when valid signup input provided', async () => {

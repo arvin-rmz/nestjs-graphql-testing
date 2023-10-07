@@ -17,7 +17,7 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, password: string) {
-    const user = await this.prismaService.user.findUnique({ where: { email } });
+    const user = await this.prismaService.user.findFirst({ where: { email } });
     if (!user) return null;
 
     const validPassword = await bcrypt.compare(password, user.password);
@@ -34,7 +34,7 @@ export class AuthService {
     const user = await this.validateUser(loginInput.email, loginInput.password);
 
     if (!user) throw new UnauthorizedException('Invalid email or password');
-
+    console.log(user.id);
     const jwt = this.jwtService.sign({ email: user.email, sub: user.id });
     return {
       userErrors: [],
@@ -42,7 +42,7 @@ export class AuthService {
         accessToken: jwt,
       },
       user,
-    };
+    } as unknown as LoginPayload;
   }
 
   async signup({
@@ -53,18 +53,21 @@ export class AuthService {
   }: SignupInputDTO): Promise<LoginPayload> {
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    const res = await this.userService.create({
+    const { user } = await this.userService.create({
       email,
       password: hashedPassword,
       firstName,
       lastName,
     });
 
-    const accessToken = this.jwtService.sign({ email, sub: res.user.id });
+    const accessToken = this.jwtService.sign({
+      email: user.email,
+      sub: user.id,
+    });
 
     return {
       userErrors: [],
-      user: res.user,
+      user: user,
       tokens: {
         accessToken,
       },

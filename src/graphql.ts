@@ -34,6 +34,14 @@ export class PostCreateInput {
     content: string;
 }
 
+export class CreateProfileInput {
+    id?: Nullable<string>;
+}
+
+export class UpdateProfileInput {
+    id: string;
+}
+
 export class CreateUserInput {
     firstName: string;
     lastName?: Nullable<string>;
@@ -42,7 +50,7 @@ export class CreateUserInput {
 }
 
 export class FindUserInput {
-    email: string;
+    id: string;
 }
 
 export class Tokens {
@@ -67,6 +75,12 @@ export abstract class IMutation {
     abstract removePet(id: number): Nullable<PetPayload> | Promise<Nullable<PetPayload>>;
 
     abstract postCreate(postCreateInput: PostCreateInput): PostPayload | Promise<PostPayload>;
+
+    abstract createProfile(createProfileInput: CreateProfileInput): Profile | Promise<Profile>;
+
+    abstract updateProfile(updateProfileInput: UpdateProfileInput): Profile | Promise<Profile>;
+
+    abstract removeProfile(id: number): Nullable<Profile> | Promise<Nullable<Profile>>;
 }
 
 export class Pet {
@@ -76,7 +90,6 @@ export class Pet {
 
 export class UserErrors {
     message: string;
-    error?: Nullable<OriginalError>;
 }
 
 export class PetPayload {
@@ -89,13 +102,23 @@ export abstract class IQuery {
 
     abstract pet(id: number): Nullable<Pet> | Promise<Nullable<Pet>>;
 
+    abstract post(id?: Nullable<string>): PostPayload | Promise<PostPayload>;
+
+    abstract posts(): PostsPayload | Promise<PostsPayload>;
+
+    abstract profile(id: string): ProfilePayload | Promise<ProfilePayload>;
+
+    abstract profiles(): ProfilesPayload | Promise<ProfilesPayload>;
+
     abstract users(): UsersPayload | Promise<UsersPayload>;
 
     abstract user(findUserInput?: Nullable<FindUserInput>): UserPayload | Promise<UserPayload>;
+
+    abstract me(): UserPayload | Promise<UserPayload>;
 }
 
 export class Post {
-    id: number;
+    id: string;
     title: string;
     content: string;
     user: User;
@@ -103,20 +126,36 @@ export class Post {
 
 export class PostPayload {
     userErrors: UserErrors[];
-    Post?: Nullable<Post>;
+    post?: Nullable<Post>;
+}
+
+export class PostsPayload {
+    userErrors: UserErrors[];
+    posts: Post[];
+}
+
+export class Profile {
+    id: string;
+    userId: number;
+    user: User;
+}
+
+export class ProfilePayload {
+    userErrors: UserErrors[];
+    profile?: Nullable<Profile>;
+}
+
+export class ProfilesPayload {
+    userErrors: UserErrors[];
+    profiles: Profile[];
 }
 
 export class User {
-    id: number;
+    id: string;
     firstName: string;
     lastName?: Nullable<string>;
     email: string;
-}
-
-export class OriginalError {
-    message?: Nullable<string>;
-    error?: Nullable<string>;
-    statusCode?: Nullable<number>;
+    posts: Post[];
 }
 
 export class UsersPayload {

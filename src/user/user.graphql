@@ -1,8 +1,9 @@
 type User {
-  id: Int!
+  id: ID!
   firstName: String!
   lastName: String
   email: String!
+  posts: [Post!]!
 }
 
 input CreateUserInput {
@@ -13,18 +14,11 @@ input CreateUserInput {
 }
 
 input FindUserInput {
-  email: String!
-}
-
-type OriginalError {
-  message: String
-  error: String
-  statusCode: Int
+  id: ID!
 }
 
 type UserErrors {
   message: String!
-  error: OriginalError
 }
 
 type UsersPayload {
@@ -40,4 +34,5 @@ type UserPayload {
 type Query {
   users: UsersPayload!
   user(findUserInput: FindUserInput): UserPayload!
+  me: UserPayload!
 }

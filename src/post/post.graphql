@@ -1,5 +1,5 @@
 type Post {
-  id: Int!
+  id: ID!
   title: String!
   content: String!
   user: User!
@@ -16,7 +16,17 @@ type UserErrors {
 
 type PostPayload {
   userErrors: [UserErrors!]!
-  Post: Post
+  post: Post
+}
+
+type PostsPayload {
+  userErrors: [UserErrors!]!
+  posts: [Post!]!
+}
+
+type Query {
+  post(id: ID): PostPayload!
+  posts: PostsPayload!
 }
 
 type Mutation {

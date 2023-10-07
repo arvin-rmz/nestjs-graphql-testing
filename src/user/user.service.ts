@@ -4,62 +4,65 @@ import { CreateUserInput, UserPayload, UsersPayload } from 'src/graphql';
 import { PrismaService } from 'src/prisma/prisma.service';
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prismaService: PrismaService) {}
 
   async findAll(): Promise<UsersPayload> {
-    const users = await this.prisma.user.findMany({
+    const users = await this.prismaService.user.findMany({
       select: {
         password: false,
         email: true,
-        id: true,
         createdAt: true,
         firstName: true,
+        posts: true,
       },
     });
 
     return {
       userErrors: [],
       users,
-    };
+    } as unknown as UsersPayload;
   }
 
-  async findOne(email: string): Promise<UserPayload> {
-    const { password, ...user } = await this.prisma.user.findUnique({
-      where: { email },
+  async findOne(id: number): Promise<UserPayload> {
+    const user = await this.prismaService.user.findUnique({
+      where: { id },
     });
 
     if (!user) {
       return {
         userErrors: [
           {
-            message: `User ${email} does not exist.`,
+            message: `User not found.`,
           },
         ],
         user: null,
       };
     }
 
+    const { password, ...restUser } = user;
+
     return {
       userErrors: [],
-      user,
-    };
+      user: restUser,
+    } as unknown as UsersPayload;
   }
 
   async create(createUserInput: CreateUserInput): Promise<UserPayload> {
     try {
-      const { password, ...user } = await this.prisma.user.create({
-        data: {
-          firstName: createUserInput.firstName,
-          lastName: createUserInput.lastName,
-          email: createUserInput.email,
-          password: createUserInput.password,
+      const { password, ...createdUser } = await this.prismaService.user.create(
+        {
+          data: {
+            firstName: createUserInput.firstName,
+            lastName: createUserInput.lastName,
+            email: createUserInput.email,
+            password: createUserInput.password,
+          },
         },
-      });
-
+      );
       return {
         userErrors: [],
-        user,
-      };
+        user: createdUser,
+      } as unknown as UserPayload;
     } catch (error) {
       if (
         error instanceof PrismaClientKnownRequestError &&
@@ -70,5 +73,18 @@ export class UserService {
         );
       }
     }
+  }
+
+  async getUserByProfileId(profileId: number) {
+    const profile = await this.prismaService.profile.findFirst({
+      where: {
+        id: profileId,
+      },
+      select: {
+        user: true,
+      },
+    });
+
+    return profile.user;
   }
 }
