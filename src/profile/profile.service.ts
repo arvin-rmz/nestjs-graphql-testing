@@ -16,13 +16,8 @@ export class ProfileService {
     return 'This action adds a new profile';
   }
 
-  async findAll() {
-    const profileList = await this.prismaService.profile.findMany();
-
-    return {
-      userErrors: [],
-      profiles: profileList,
-    };
+  findAll() {
+    return this.prismaService.profile.findMany();
   }
 
   async findOne(id: number) {
@@ -32,20 +27,7 @@ export class ProfileService {
       },
     });
 
-    if (!profile)
-      return {
-        userErrors: [
-          {
-            message: 'Profile not found.',
-          },
-        ],
-        profile: null,
-      };
-
-    return {
-      userErrors: [],
-      profile,
-    };
+    return profile;
   }
 
   update(id: number, updateProfileInput: UpdateProfileInput) {

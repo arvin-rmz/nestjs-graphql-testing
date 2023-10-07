@@ -57,16 +57,16 @@ export class Tokens {
     accessToken?: Nullable<string>;
 }
 
-export class LoginPayload {
+export class AuthPayload {
     userErrors: UserErrors[];
     tokens?: Nullable<Tokens>;
     user?: Nullable<User>;
 }
 
 export abstract class IMutation {
-    abstract login(loginInput?: Nullable<LoginInput>): LoginPayload | Promise<LoginPayload>;
+    abstract login(loginInput?: Nullable<LoginInput>): AuthPayload | Promise<AuthPayload>;
 
-    abstract signup(signupInput?: Nullable<SignupInput>): LoginPayload | Promise<LoginPayload>;
+    abstract signup(signupInput?: Nullable<SignupInput>): AuthPayload | Promise<AuthPayload>;
 
     abstract createPet(createPetInput: CreatePetInput): PetPayload | Promise<PetPayload>;
 
@@ -76,11 +76,11 @@ export abstract class IMutation {
 
     abstract postCreate(postCreateInput: PostCreateInput): PostPayload | Promise<PostPayload>;
 
-    abstract createProfile(createProfileInput: CreateProfileInput): Profile | Promise<Profile>;
+    abstract createProfile(createProfileInput: CreateProfileInput): ProfilePayload | Promise<ProfilePayload>;
 
-    abstract updateProfile(updateProfileInput: UpdateProfileInput): Profile | Promise<Profile>;
+    abstract updateProfile(updateProfileInput: UpdateProfileInput): ProfilePayload | Promise<ProfilePayload>;
 
-    abstract removeProfile(id: number): Nullable<Profile> | Promise<Nullable<Profile>>;
+    abstract removeProfile(id: number): string | Promise<string>;
 }
 
 export class Pet {
@@ -102,19 +102,19 @@ export abstract class IQuery {
 
     abstract pet(id: number): Nullable<Pet> | Promise<Nullable<Pet>>;
 
-    abstract post(id?: Nullable<string>): PostPayload | Promise<PostPayload>;
+    abstract post(id?: Nullable<string>): Nullable<Post> | Promise<Nullable<Post>>;
 
-    abstract posts(): PostsPayload | Promise<PostsPayload>;
+    abstract posts(): Post[] | Promise<Post[]>;
 
-    abstract profile(id: string): ProfilePayload | Promise<ProfilePayload>;
+    abstract profile(id: string): Nullable<Profile> | Promise<Nullable<Profile>>;
 
-    abstract profiles(): ProfilesPayload | Promise<ProfilesPayload>;
+    abstract profiles(): Profile[] | Promise<Profile[]>;
 
-    abstract users(): UsersPayload | Promise<UsersPayload>;
+    abstract me(): Nullable<User> | Promise<Nullable<User>>;
 
-    abstract user(findUserInput?: Nullable<FindUserInput>): UserPayload | Promise<UserPayload>;
+    abstract user(findUserInput?: Nullable<FindUserInput>): Nullable<User> | Promise<Nullable<User>>;
 
-    abstract me(): UserPayload | Promise<UserPayload>;
+    abstract users(): User[] | Promise<User[]>;
 }
 
 export class Post {
@@ -129,11 +129,6 @@ export class PostPayload {
     post?: Nullable<Post>;
 }
 
-export class PostsPayload {
-    userErrors: UserErrors[];
-    posts: Post[];
-}
-
 export class Profile {
     id: string;
     userId: number;
@@ -145,27 +140,12 @@ export class ProfilePayload {
     profile?: Nullable<Profile>;
 }
 
-export class ProfilesPayload {
-    userErrors: UserErrors[];
-    profiles: Profile[];
-}
-
 export class User {
     id: string;
     firstName: string;
     lastName?: Nullable<string>;
     email: string;
     posts: Post[];
-}
-
-export class UsersPayload {
-    userErrors: UserErrors[];
-    users?: Nullable<Nullable<User>[]>;
-}
-
-export class UserPayload {
-    userErrors: UserErrors[];
-    user?: Nullable<User>;
 }
 
 type Nullable<T> = T | null;

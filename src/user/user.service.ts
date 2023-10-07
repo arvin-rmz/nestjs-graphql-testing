@@ -1,12 +1,12 @@
 import { Injectable, ConflictException } from '@nestjs/common';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { CreateUserInput, UserPayload, UsersPayload } from 'src/graphql';
+import { CreateUserInput } from 'src/graphql';
 import { PrismaService } from 'src/prisma/prisma.service';
 @Injectable()
 export class UserService {
   constructor(private prismaService: PrismaService) {}
 
-  async findAll(): Promise<UsersPayload> {
+  async findAll() {
     const users = await this.prismaService.user.findMany({
       select: {
         password: false,
@@ -14,40 +14,26 @@ export class UserService {
         createdAt: true,
         firstName: true,
         posts: true,
+        id: true,
       },
     });
 
-    return {
-      userErrors: [],
-      users,
-    } as unknown as UsersPayload;
+    return users;
   }
 
-  async findOne(id: number): Promise<UserPayload> {
+  async findOne(id: number) {
     const user = await this.prismaService.user.findUnique({
       where: { id },
     });
 
-    if (!user) {
-      return {
-        userErrors: [
-          {
-            message: `User not found.`,
-          },
-        ],
-        user: null,
-      };
-    }
+    if (!user) return null;
 
     const { password, ...restUser } = user;
 
-    return {
-      userErrors: [],
-      user: restUser,
-    } as unknown as UsersPayload;
+    return restUser;
   }
 
-  async create(createUserInput: CreateUserInput): Promise<UserPayload> {
+  async create(createUserInput: CreateUserInput) {
     try {
       const { password, ...createdUser } = await this.prismaService.user.create(
         {
@@ -59,10 +45,8 @@ export class UserService {
           },
         },
       );
-      return {
-        userErrors: [],
-        user: createdUser,
-      } as unknown as UserPayload;
+
+      return createdUser;
     } catch (error) {
       if (
         error instanceof PrismaClientKnownRequestError &&

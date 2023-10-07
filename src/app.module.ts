@@ -14,6 +14,7 @@ import { PostModule } from './post/post.module';
 import { AuthModule } from './auth/auth.module';
 import { UserService } from './user/user.service';
 import { ProfileModule } from './profile/profile.module';
+import { DataloaderModule } from './dataloader/dataloader.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { ProfileModule } from './profile/profile.module';
     PostModule,
     AuthModule,
     ProfileModule,
+    DataloaderModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService, UserService],

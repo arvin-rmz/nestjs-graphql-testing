@@ -17,22 +17,8 @@ input FindUserInput {
   id: ID!
 }
 
-type UserErrors {
-  message: String!
-}
-
-type UsersPayload {
-  userErrors: [UserErrors!]!
-  users: [User]
-}
-
-type UserPayload {
-  userErrors: [UserErrors!]!
-  user: User
-}
-
 type Query {
-  users: UsersPayload!
-  user(findUserInput: FindUserInput): UserPayload!
-  me: UserPayload!
+  me: User
+  user(findUserInput: FindUserInput): User
+  users: [User!]!
 }

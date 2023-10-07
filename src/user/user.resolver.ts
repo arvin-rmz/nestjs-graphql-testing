@@ -9,7 +9,7 @@ import {
 } from '@nestjs/graphql';
 import { UserService } from './user.service';
 import { FindUserInputDTO } from './dto/find-one-user-input';
-import { User, UserPayload } from 'src/graphql';
+import { User } from 'src/graphql';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth-guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { PostService } from 'src/post/post.service';
@@ -23,7 +23,6 @@ export class UserResolver {
   ) {}
 
   @Query('users')
-  @UseGuards(JwtAuthGuard)
   findAll() {
     return this.userService.findAll();
   }

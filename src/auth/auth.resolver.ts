@@ -10,13 +10,13 @@ export class AuthResolver {
   constructor(private readonly authService: AuthService) {}
 
   @Mutation('login')
-  @UseGuards(GqlAuthGuard)
+  // @UseGuards(GqlAuthGuard)
   login(@Args('loginInput') loginInput: LoginInputDTO) {
     return this.authService.login(loginInput);
   }
 
   @Mutation('signup')
-  @UseGuards(GqlAuthGuard)
+  // @UseGuards(GqlAuthGuard)
   signup(@Args('signupInput') signupInput: SignupInputDTO) {
     return this.authService.signup(signupInput);
   }

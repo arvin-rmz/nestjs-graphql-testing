@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PostCreateInput, PostPayload, PostsPayload, User } from 'src/graphql';
+import { Post, PostCreateInput, PostPayload, User } from 'src/graphql';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserService } from 'src/user/user.service';
 
@@ -18,14 +18,11 @@ export class PostService {
         userId: 1,
       },
     });
-    const { user } = await this.userService.findOne(currentUserId);
+    // const { user } = await this.userService.findOne(currentUserId);
 
     return {
       userErrors: [],
-      post: {
-        ...post,
-        user,
-      },
+      post,
     };
   }
 
@@ -36,22 +33,16 @@ export class PostService {
       },
     });
 
-    return {
-      userErrors: [],
-      post,
-    };
+    return post;
   }
 
-  async findAll(): Promise<PostsPayload> {
+  async findAll() {
     const posts = await this.prisma.post.findMany({});
 
-    return {
-      userErrors: [],
-      posts,
-    } as unknown as PostsPayload;
+    return posts;
   }
 
-  async findUserPosts(id: number): Promise<PostsPayload> {
+  async findUserPosts(id: number) {
     const posts = await this.prisma.post.findMany({
       where: {
         id,
@@ -61,6 +52,6 @@ export class PostService {
     return {
       userErrors: [],
       posts,
-    } as unknown as PostsPayload;
+    };
   }
 }

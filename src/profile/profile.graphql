@@ -17,18 +17,13 @@ type ProfilePayload {
   profile: Profile
 }
 
-type ProfilesPayload {
-  userErrors: [UserErrors!]!
+type Query {
+  profile(id: ID!): Profile
   profiles: [Profile!]!
 }
 
-type Query {
-  profile(id: ID!): ProfilePayload!
-  profiles: ProfilesPayload!
-}
-
 type Mutation {
-  createProfile(createProfileInput: CreateProfileInput!): Profile!
-  updateProfile(updateProfileInput: UpdateProfileInput!): Profile!
-  removeProfile(id: Int!): Profile
+  createProfile(createProfileInput: CreateProfileInput!): ProfilePayload!
+  updateProfile(updateProfileInput: UpdateProfileInput!): ProfilePayload!
+  removeProfile(id: Int!): String!
 }

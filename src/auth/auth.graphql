@@ -14,13 +14,13 @@ input SignupInput {
   lastName: String
 }
 
-type LoginPayload {
+type AuthPayload {
   userErrors: [UserErrors!]!
   tokens: Tokens
   user: User
 }
 
 type Mutation {
-  login(loginInput: LoginInput): LoginPayload!
-  signup(signupInput: SignupInput): LoginPayload!
+  login(loginInput: LoginInput): AuthPayload!
+  signup(signupInput: SignupInput): AuthPayload!
 }

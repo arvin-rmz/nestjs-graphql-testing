@@ -1,5 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { LoginPayload } from 'src/graphql';
+import { AuthPayload } from 'src/graphql';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
@@ -30,11 +30,11 @@ export class AuthService {
     return null;
   }
 
-  async login(loginInput: LoginInputDTO): Promise<LoginPayload> {
+  async login(loginInput: LoginInputDTO): Promise<AuthPayload> {
     const user = await this.validateUser(loginInput.email, loginInput.password);
 
     if (!user) throw new UnauthorizedException('Invalid email or password');
-    console.log(user.id);
+
     const jwt = this.jwtService.sign({ email: user.email, sub: user.id });
     return {
       userErrors: [],
@@ -42,7 +42,7 @@ export class AuthService {
         accessToken: jwt,
       },
       user,
-    } as unknown as LoginPayload;
+    } as unknown as AuthPayload;
   }
 
   async signup({
@@ -50,10 +50,10 @@ export class AuthService {
     password,
     firstName,
     lastName,
-  }: SignupInputDTO): Promise<LoginPayload> {
+  }: SignupInputDTO): Promise<AuthPayload> {
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    const { user } = await this.userService.create({
+    const user = await this.userService.create({
       email,
       password: hashedPassword,
       firstName,
@@ -67,7 +67,7 @@ export class AuthService {
 
     return {
       userErrors: [],
-      user: user,
+      user: user as unknown as AuthPayload['user'],
       tokens: {
         accessToken,
       },

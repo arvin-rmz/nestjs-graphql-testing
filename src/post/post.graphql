@@ -19,14 +19,9 @@ type PostPayload {
   post: Post
 }
 
-type PostsPayload {
-  userErrors: [UserErrors!]!
-  posts: [Post!]!
-}
-
 type Query {
-  post(id: ID): PostPayload!
-  posts: PostsPayload!
+  post(id: ID): Post
+  posts: [Post!]!
 }
 
 type Mutation {

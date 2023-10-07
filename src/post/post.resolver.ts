@@ -48,9 +48,7 @@ export class PostResolver {
   }
 
   @ResolveField('user')
-  async getUser(@Parent() { userId }: IGetUserParent) {
-    const { user } = await this.userService.findOne(Number(userId));
-
-    return user;
+  getUser(@Parent() { userId }: IGetUserParent) {
+    return this.userService.findOne(Number(userId));
   }
 }
