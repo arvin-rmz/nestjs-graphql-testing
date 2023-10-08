@@ -1,11 +1,3 @@
-import {
-  Args,
-  Mutation,
-  Parent,
-  Query,
-  ResolveField,
-  Resolver,
-} from '@nestjs/graphql';
 import { PostService } from './post.service';
 import { PostCreateInputDTO } from './dto/post-create-input';
 import { UseGuards } from '@nestjs/common';
@@ -14,6 +6,17 @@ import { CurrentUser } from 'src/user/decorators/current-user.decorator';
 import { Post } from 'src/graphql';
 import { UserService } from 'src/user/user.service';
 import { IJwtPayload } from 'src/auth/strategies/jwt.strategy';
+import { DataLoaderService } from 'src/dataloader/dataloader.service';
+import { IDataloaders } from 'src/dataloader/dataloader.interface';
+import {
+  Args,
+  Context,
+  Mutation,
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+} from '@nestjs/graphql';
 
 interface IGetUserParent extends Post {
   userId: string;
@@ -24,6 +27,7 @@ export class PostResolver {
   constructor(
     private readonly postService: PostService,
     private readonly userService: UserService,
+    private readonly dataloaderService: DataLoaderService,
   ) {}
 
   @Mutation('postCreate')
@@ -48,7 +52,10 @@ export class PostResolver {
   }
 
   @ResolveField('user')
-  getUser(@Parent() { userId }: IGetUserParent) {
-    return this.userService.findOne(Number(userId));
+  getUser(
+    @Parent() { userId }: IGetUserParent,
+    @Context() { loaders }: { loaders: IDataloaders },
+  ) {
+    return loaders.userLoader.load(Number(userId));
   }
 }

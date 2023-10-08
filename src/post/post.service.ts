@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Post, PostCreateInput, PostPayload, User } from 'src/graphql';
+import { PostCreateInput } from 'src/graphql';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserService } from 'src/user/user.service';
 
@@ -15,10 +15,9 @@ export class PostService {
       data: {
         title: postCreateInput.title,
         content: postCreateInput.content,
-        userId: 1,
+        userId: currentUserId,
       },
     });
-    // const { user } = await this.userService.findOne(currentUserId);
 
     return {
       userErrors: [],

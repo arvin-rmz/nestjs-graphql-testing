@@ -15,25 +15,31 @@ import { AuthModule } from './auth/auth.module';
 import { UserService } from './user/user.service';
 import { ProfileModule } from './profile/profile.module';
 import { DataloaderModule } from './dataloader/dataloader.module';
+import { DataLoaderService } from './dataloader/dataloader.service';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    // GraphQLModule.forRoot<ApolloDriverConfig>({
-    //   driver: ApolloDriver,
-    // }),
-    GraphQLModule.forRoot<ApolloDriverConfig>({
-      driver: ApolloDriver,
-      typePaths: ['./**/*.graphql'],
-      // used apollo playground
-      playground: false,
-      plugins: [ApolloServerPluginLandingPageLocalDefault()],
-      // this will auto generate a graphql types
 
-      definitions: {
-        path: join(process.cwd(), 'src/graphql.ts'),
-        outputAs: 'class',
+    GraphQLModule.forRootAsync<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      imports: [DataloaderModule],
+      useFactory: (dataLoaderService: DataLoaderService) => {
+        return {
+          typePaths: ['./**/*.graphql'],
+          playground: false,
+          plugins: [ApolloServerPluginLandingPageLocalDefault()],
+          definitions: {
+            path: join(process.cwd(), 'src/graphql.ts'),
+            outputAs: 'class',
+          },
+
+          context: () => ({
+            loaders: dataLoaderService.getLoaders(),
+          }),
+        };
       },
+      inject: [DataLoaderService],
     }),
     PrismaModule,
     PetModule,

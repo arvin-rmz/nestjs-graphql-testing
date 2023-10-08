@@ -1,8 +1,8 @@
 import DataLoader from 'dataloader';
-import { User } from 'src/graphql';
+import { User } from 'prisma/prisma-client';
 
-// https://blog.logrocket.com/use-dataloader-nestjs/
+// REFERENCE ==> https://blog.logrocket.com/use-dataloader-nestjs/
 
 export interface IDataloaders {
-  usersLoader: DataLoader<number, User>;
+  userLoader: DataLoader<number, User>;
 }

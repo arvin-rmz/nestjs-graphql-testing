@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
+import { DataLoaderService } from './dataloader.service';
+import { UserService } from 'src/user/user.service';
 
-// https://blog.logrocket.com/use-dataloader-nestjs/
-
-@Module({})
+@Module({
+  providers: [DataLoaderService, UserService],
+  exports: [DataLoaderService],
+})
 export class DataloaderModule {}

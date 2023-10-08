@@ -1,5 +1,6 @@
 import { Injectable, ConflictException } from '@nestjs/common';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { User } from 'prisma/prisma-client';
 import { CreateUserInput } from 'src/graphql';
 import { PrismaService } from 'src/prisma/prisma.service';
 @Injectable()
@@ -70,5 +71,27 @@ export class UserService {
     });
 
     return profile.user;
+  }
+
+  async getAllByBatch(ids: number[]) {
+    const users = await this.prismaService.user.findMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+    });
+
+    return this._sortUsersByIds(users, ids);
+  }
+
+  private _sortUsersByIds(users: User[], ids: number[]) {
+    const userMap: Record<string, User> = {};
+
+    users.forEach((user) => {
+      userMap[user.id] = user;
+    });
+
+    return ids.map((id) => userMap[id]);
   }
 }
