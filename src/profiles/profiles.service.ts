@@ -3,14 +3,14 @@ import { Injectable } from '@nestjs/common';
 import { CreateProfileInput } from './dto/create-profile.input';
 import { UpdateProfileInput } from './dto/update-profile.input';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { UserService } from 'src/user/user.service';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
-export class ProfileService {
+export class ProfilesService {
   constructor(
     private readonly prismaService: PrismaService,
 
-    private readonly userService: UserService,
+    private readonly usersService: UsersService,
   ) {}
 
   create(createProfileInput: CreateProfileInput) {

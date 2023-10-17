@@ -7,13 +7,13 @@ import { ConfigModule } from '@nestjs/config';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 
 import { PrismaModule } from './prisma/prisma.module';
-import { PetModule } from './pet/pet.module';
+import { PetsModule } from './pet/pets.module';
 import { PrismaService } from './prisma/prisma.service';
-import { UserModule } from './user/user.module';
-import { PostModule } from './post/post.module';
+import { UsersModule } from './users/users.module';
+import { PostsModule } from './posts/posts.module';
 import { AuthModule } from './auth/auth.module';
-import { UserService } from './user/user.service';
-import { ProfileModule } from './profile/profile.module';
+import { UsersService } from './users/users.service';
+import { ProfilesModule } from './profiles/profiles.module';
 import { DataloaderModule } from './dataloader/dataloader.module';
 import { DataLoaderService } from './dataloader/dataloader.service';
 import { ErrorCode } from './types/error.types';
@@ -119,13 +119,13 @@ export interface IOriginalError {
       inject: [DataLoaderService],
     }),
     PrismaModule,
-    PetModule,
-    UserModule,
-    PostModule,
+    PetsModule,
+    UsersModule,
+    PostsModule,
     AuthModule,
-    ProfileModule,
+    ProfilesModule,
     DataloaderModule,
   ],
-  providers: [PrismaService, UserService],
+  providers: [PrismaService, UsersService],
 })
 export class AppModule {}

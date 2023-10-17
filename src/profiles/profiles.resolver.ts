@@ -8,36 +8,36 @@ import {
 } from '@nestjs/graphql';
 import { Profile } from 'src/graphql';
 
-import { ProfileService } from './profile.service';
+import { ProfilesService } from './profiles.service';
 import { CreateProfileInput } from './dto/create-profile.input';
-import { UserService } from 'src/user/user.service';
+import { UsersService } from 'src/users/users.service';
 
 @Resolver('Profile')
-export class ProfileResolver {
+export class ProfilesResolver {
   constructor(
-    private readonly profileService: ProfileService,
-    private readonly userService: UserService,
+    private readonly profilesService: ProfilesService,
+    private readonly usersService: UsersService,
   ) {}
 
   @Mutation('profileCreate')
   createProfile(
     @Args('createProfileInput') createProfileInput: CreateProfileInput,
   ) {
-    return this.profileService.create(createProfileInput);
+    return this.profilesService.create(createProfileInput);
   }
 
   @Query('profiles')
   getAllProfiles() {
-    return this.profileService.findAll();
+    return this.profilesService.findAll();
   }
 
   @Query('profile')
   getProfile(@Args('id') id: string) {
-    return this.profileService.findOne(Number(id));
+    return this.profilesService.findOne(Number(id));
   }
 
   @ResolveField('user')
   async getUser(@Parent() profile: Profile) {
-    return this.userService.getByProfileId(Number(profile.id));
+    return this.usersService.getByProfileId(Number(profile.id));
   }
 }

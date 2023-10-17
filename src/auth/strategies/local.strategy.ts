@@ -21,7 +21,6 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     });
 
     if (authInputValidation?.field) {
-      console.log(authInputValidation);
       throw new BadRequestError(authInputValidation.message, {
         field: authInputValidation.field,
       });

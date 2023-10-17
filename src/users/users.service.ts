@@ -9,7 +9,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { BadRequestError } from 'src/errors/bad-request.error';
 import { UserExistError } from 'src/errors/user-exist.error';
 @Injectable()
-export class UserService {
+export class UsersService {
   constructor(private prismaService: PrismaService) {}
 
   async findAll() {

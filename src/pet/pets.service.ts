@@ -4,7 +4,7 @@ import { CreatePetInput, PetPayload, UpdatePetInput } from '../graphql';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
-export class PetService {
+export class PetsService {
   constructor(private prisma: PrismaService) {}
 
   async create(createPetInput: CreatePetInput): Promise<PetPayload> {

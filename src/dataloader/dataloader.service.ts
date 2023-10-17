@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import DataLoader from 'dataloader';
 import { User } from 'prisma/prisma-client';
 
-import { UserService } from 'src/user/user.service';
+import { UsersService } from 'src/users/users.service';
 import { IDataloaders } from './dataloader.interface';
 
 // REFERENCE ==> https://blog.logrocket.com/use-dataloader-nestjs/
@@ -11,7 +11,7 @@ type BatchUsers = (ids: number[]) => Promise<User[]>;
 
 @Injectable()
 export class DataLoaderService {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly usersService: UsersService) {}
 
   getLoaders(): IDataloaders {
     const userLoader = this._createUserLoader();
@@ -27,6 +27,6 @@ export class DataLoaderService {
   }
 
   private _batchUsers: BatchUsers = async (ids: number[]) => {
-    return this.userService.getAllByBatch(ids as number[]);
+    return this.usersService.getAllByBatch(ids as number[]);
   };
 }

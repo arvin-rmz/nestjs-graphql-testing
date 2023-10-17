@@ -2,35 +2,34 @@ import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 // @ts-ignore
 import { CreatePetInput, UpdatePetInput } from '../graphql';
 
-import { PetService } from './pet.service';
-import { CreatePetInputDTO } from './dto/create-pet.input';
+import { PetsService } from './pets.service';
 
 @Resolver('Pet')
-export class PetResolver {
-  constructor(private readonly petService: PetService) {}
+export class PetsResolver {
+  constructor(private readonly petsService: PetsService) {}
 
   @Mutation('createPet')
   create(@Args('createPetInput') createPetInput: CreatePetInput) {
-    return this.petService.create(createPetInput);
+    return this.petsService.create(createPetInput);
   }
 
   @Query('pets')
   findAll() {
-    return this.petService.findAll();
+    return this.petsService.findAll();
   }
 
   @Query('pet')
   findOne(@Args('id') id: number) {
-    return this.petService.findOne(id);
+    return this.petsService.findOne(id);
   }
 
   @Mutation('updatePet')
   update(@Args('updatePetInput') updatePetInput: UpdatePetInput) {
-    return this.petService.update(updatePetInput.id, updatePetInput);
+    return this.petsService.update(updatePetInput.id, updatePetInput);
   }
 
   @Mutation('removePet')
   remove(@Args('id') id: number) {
-    return this.petService.remove(id);
+    return this.petsService.remove(id);
   }
 }

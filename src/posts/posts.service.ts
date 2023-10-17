@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { GraphQLError } from 'graphql';
 import { PostCreateInput } from 'src/graphql';
 
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ErrorCode } from 'src/types/error.types';
-import { UserService } from 'src/user/user.service';
+import { UsersService } from 'src/users/users.service';
 
 class CustomError extends Error {
   extensions: {
@@ -18,10 +17,10 @@ class CustomError extends Error {
 }
 
 @Injectable()
-export class PostService {
+export class PostsService {
   constructor(
     private prisma: PrismaService,
-    private readonly userService: UserService,
+    private readonly usersService: UsersService,
   ) {}
 
   async create(postCreateInput: PostCreateInput, currentUserId: number) {

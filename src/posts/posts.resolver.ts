@@ -10,16 +10,16 @@ import {
   Resolver,
 } from '@nestjs/graphql';
 
-import { PostService } from './post.service';
+import { PostsService } from './posts.service';
 import { PostCreateInputDTO } from './dto/post-create-input';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth-guard';
-import { CurrentUser } from 'src/user/decorators/current-user.decorator';
+import { CurrentUser } from 'src/users/decorators/current-user.decorator';
 import { IJwtPayload } from 'src/auth/strategies/jwt.strategy';
 import { IDataloaders } from 'src/dataloader/dataloader.interface';
 
 @Resolver('Post')
-export class PostResolver {
-  constructor(private readonly postService: PostService) {}
+export class PostsResolver {
+  constructor(private readonly postService: PostsService) {}
 
   @Mutation('postCreate')
   @UseGuards(JwtAuthGuard)

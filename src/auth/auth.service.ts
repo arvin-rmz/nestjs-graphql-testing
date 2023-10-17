@@ -4,18 +4,18 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
 import { SignupInputDTO } from './dto/signup.input.dto';
-import { UserService } from 'src/user/user.service';
+import { UsersService } from 'src/users/users.service';
 import { BadRequestError } from 'src/errors/bad-request.error';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly userService: UserService,
+    private readonly usersService: UsersService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
-    const user = await this.userService.findByEmail(email);
+    const user = await this.usersService.findByEmail(email);
 
     if (!user) throw new BadRequestError('Invalid email or password');
 
@@ -50,7 +50,7 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(password, 12);
 
     // User.email is set to unique, and an error will be thrown if a user already exists through userService.create().
-    const user = await this.userService.create({
+    const user = await this.usersService.create({
       email,
       password: hashedPassword,
       firstName,

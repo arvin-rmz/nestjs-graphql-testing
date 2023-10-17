@@ -1,23 +1,23 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PetResolver } from './pet.resolver';
-import { PetService } from './pet.service';
+import { PetsResolver } from './pets.resolver';
+import { PetsService } from './pets.service';
 
 describe('PetResolver', () => {
-  let resolver: PetResolver;
+  let resolver: PetsResolver;
   const petService = {};
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        PetResolver,
+        PetsResolver,
         {
-          provide: PetService,
+          provide: PetsService,
           useValue: petService,
         },
       ],
     }).compile();
 
-    resolver = module.get<PetResolver>(PetResolver);
+    resolver = module.get<PetsResolver>(PetsResolver);
   });
 
   it('should be defined', () => {
