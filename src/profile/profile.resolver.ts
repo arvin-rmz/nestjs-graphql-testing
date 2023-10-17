@@ -1,4 +1,3 @@
-import { NotFoundException } from '@nestjs/common';
 import {
   Resolver,
   Query,
@@ -7,10 +6,10 @@ import {
   Parent,
   ResolveField,
 } from '@nestjs/graphql';
+import { Profile } from 'src/graphql';
+
 import { ProfileService } from './profile.service';
 import { CreateProfileInput } from './dto/create-profile.input';
-import { UpdateProfileInput } from './dto/update-profile.input';
-import { Profile, User } from 'src/graphql';
 import { UserService } from 'src/user/user.service';
 
 @Resolver('Profile')
@@ -20,8 +19,10 @@ export class ProfileResolver {
     private readonly userService: UserService,
   ) {}
 
-  @Mutation('createProfile')
-  create(@Args('createProfileInput') createProfileInput: CreateProfileInput) {
+  @Mutation('profileCreate')
+  createProfile(
+    @Args('createProfileInput') createProfileInput: CreateProfileInput,
+  ) {
     return this.profileService.create(createProfileInput);
   }
 
@@ -37,6 +38,6 @@ export class ProfileResolver {
 
   @ResolveField('user')
   async getUser(@Parent() profile: Profile) {
-    return this.userService.getUserByProfileId(Number(profile.id));
+    return this.userService.getByProfileId(Number(profile.id));
   }
 }

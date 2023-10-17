@@ -1,46 +1,50 @@
+import { ConfigService } from '@nestjs/config';
+import { LoginInputDTO } from './dto/login.input.dto';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { User } from 'prisma/prisma-client';
 import { AuthPayload } from 'src/graphql';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
 import { PrismaService } from 'src/prisma/prisma.service';
-import { LoginInputDTO } from './dto/login.input.dto';
 import { SignupInputDTO } from './dto/signup.input.dto';
 import { UserService } from 'src/user/user.service';
+import { CustomError } from 'src/errors/custom-error';
+import { ErrorCode } from 'src/types/error.types';
+import { BadRequestError } from 'src/errors/bad-request.error';
+import { validateAuthBodyAndParseErrors } from './utils/auth-input.validation';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly prismaService: PrismaService,
     private readonly userService: UserService,
+    private readonly configService: ConfigService,
   ) {}
 
-  async validateUser(email: string, password: string) {
-    const user = await this.prismaService.user.findFirst({ where: { email } });
-    if (!user) return null;
+  async validateUser(email: string, password: string): Promise<any> {
+    const user = await this.userService.findByEmail(email);
+
+    if (!user) throw new BadRequestError('Invalid email or password');
 
     const validPassword = await bcrypt.compare(password, user.password);
-    if (validPassword) {
-      const { password, ...result } = user;
 
-      return result;
-    }
+    if (!validPassword) throw new BadRequestError('Invalid email or password');
+
+    const { password: passwordToExtract, ...userExtractedPassword } = user;
+
+    return userExtractedPassword;
 
     return null;
   }
 
-  async login(loginInput: LoginInputDTO): Promise<AuthPayload> {
-    const user = await this.validateUser(loginInput.email, loginInput.password);
-
-    if (!user) throw new UnauthorizedException('Invalid email or password');
-
+  async login(user: any): Promise<any> {
     const jwt = this.jwtService.sign({ email: user.email, sub: user.id });
+
     return {
       userErrors: [],
-      tokens: {
-        accessToken: jwt,
-      },
+      accessToken: jwt,
+
       user,
     } as unknown as AuthPayload;
   }
@@ -53,6 +57,7 @@ export class AuthService {
   }: SignupInputDTO): Promise<AuthPayload> {
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    // User.email is set to unique, and an error will be thrown if a user already exists through userService.create().
     const user = await this.userService.create({
       email,
       password: hashedPassword,
@@ -68,9 +73,7 @@ export class AuthService {
     return {
       userErrors: [],
       user: user as unknown as AuthPayload['user'],
-      tokens: {
-        accessToken,
-      },
+      accessToken,
     };
   }
 }

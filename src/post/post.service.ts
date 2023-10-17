@@ -1,7 +1,21 @@
 import { Injectable } from '@nestjs/common';
+import { GraphQLError } from 'graphql';
 import { PostCreateInput } from 'src/graphql';
+
 import { PrismaService } from 'src/prisma/prisma.service';
+import { ErrorCode } from 'src/types/error.types';
 import { UserService } from 'src/user/user.service';
+
+class CustomError extends Error {
+  extensions: {
+    code: string;
+  };
+
+  constructor(message: string, extensions: { code: string }) {
+    super(message);
+    this.extensions = extensions;
+  }
+}
 
 @Injectable()
 export class PostService {
@@ -32,6 +46,18 @@ export class PostService {
       },
     });
 
+    if (!post) {
+      // throw new GraphQLError(`Post with id: ${id} not found.`, {
+      //   extensions: { code: ErrorCode.NOT_FOUND_ERROR },
+      // });
+      const customError = new CustomError(`Post with id: ${id} not found`, {
+        code: ErrorCode.NOT_FOUND_ERROR,
+      });
+      // @ts-ignore
+      // customError.code = ErrorCode.NOT_FOUND_ERROR;
+      throw customError;
+    }
+
     return post;
   }
 
@@ -41,7 +67,7 @@ export class PostService {
     return posts;
   }
 
-  async findUserPosts(id: number) {
+  async findAllByUserId(id: number) {
     const posts = await this.prisma.post.findMany({
       where: {
         id,

@@ -53,13 +53,16 @@ export class FindUserInput {
     id: string;
 }
 
-export class Tokens {
-    accessToken?: Nullable<string>;
+export class UserError {
+    message: string;
+    field?: Nullable<string>;
+    code: string;
 }
 
 export class AuthPayload {
-    userErrors: UserErrors[];
-    tokens?: Nullable<Tokens>;
+    userErrors: UserError[];
+    accessToken?: Nullable<string>;
+    refreshToken?: Nullable<string>;
     user?: Nullable<User>;
 }
 
@@ -76,11 +79,11 @@ export abstract class IMutation {
 
     abstract postCreate(postCreateInput: PostCreateInput): PostPayload | Promise<PostPayload>;
 
-    abstract createProfile(createProfileInput: CreateProfileInput): ProfilePayload | Promise<ProfilePayload>;
+    abstract profileCreate(createProfileInput: CreateProfileInput): ProfilePayload | Promise<ProfilePayload>;
 
-    abstract updateProfile(updateProfileInput: UpdateProfileInput): ProfilePayload | Promise<ProfilePayload>;
+    abstract profileUpdate(updateProfileInput: UpdateProfileInput): ProfilePayload | Promise<ProfilePayload>;
 
-    abstract removeProfile(id: number): string | Promise<string>;
+    abstract profileDelete(id: number): string | Promise<string>;
 }
 
 export class Pet {
@@ -104,7 +107,7 @@ export abstract class IQuery {
 
     abstract post(id?: Nullable<string>): Nullable<Post> | Promise<Nullable<Post>>;
 
-    abstract posts(): Post[] | Promise<Post[]>;
+    abstract posts(): Nullable<Nullable<Post>[]> | Promise<Nullable<Nullable<Post>[]>>;
 
     abstract profile(id: string): Nullable<Profile> | Promise<Nullable<Profile>>;
 
@@ -125,7 +128,7 @@ export class Post {
 }
 
 export class PostPayload {
-    userErrors: UserErrors[];
+    userErrors: UserError[];
     post?: Nullable<Post>;
 }
 
@@ -148,4 +151,10 @@ export class User {
     posts: Post[];
 }
 
+export class UserPayload {
+    user?: Nullable<User>;
+    userErrors: UserError[];
+}
+
+export type PostResult = Post | UserError;
 type Nullable<T> = T | null;

@@ -10,18 +10,36 @@ input PostCreateInput {
   content: String!
 }
 
-type UserErrors {
+# interface Error {
+#   message: String!
+#   code: String!
+# }
+
+type UserError {
   message: String!
+  code: String!
 }
 
+# type UserErrors {
+#   message: String!
+# }
+
 type PostPayload {
-  userErrors: [UserErrors!]!
+  userErrors: [UserError!]!
   post: Post
 }
 
+# type PostPayloadSuccess {
+#   post: Post!
+# }
+
+union PostResult = Post | UserError
+
+# union PostsResult = [Post] | UserError
+
 type Query {
   post(id: ID): Post
-  posts: [Post!]!
+  posts: [Post]
 }
 
 type Mutation {

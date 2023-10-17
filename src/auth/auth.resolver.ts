@@ -1,23 +1,25 @@
-import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import { UseGuards } from '@nestjs/common';
+import { Args, Context, Mutation, Resolver, Query } from '@nestjs/graphql';
+
 import { AuthService } from './auth.service';
 import { LoginInputDTO } from './dto/login.input.dto';
-import { UseGuards } from '@nestjs/common';
-import { GqlAuthGuard } from './guards/gql-auth-guard';
 import { SignupInputDTO } from './dto/signup.input.dto';
+import { GqlAuthGuard } from './guards/gql-auth-guard';
+import { User } from 'prisma/prisma-client';
 
 @Resolver('Auth')
 export class AuthResolver {
   constructor(private readonly authService: AuthService) {}
 
   @Mutation('login')
-  // @UseGuards(GqlAuthGuard)
-  login(@Args('loginInput') loginInput: LoginInputDTO) {
-    return this.authService.login(loginInput);
+  @UseGuards(GqlAuthGuard)
+  login(@Args('loginInput') _: LoginInputDTO, @Context() context) {
+    return this.authService.login(context.user);
   }
 
   @Mutation('signup')
-  // @UseGuards(GqlAuthGuard)
   signup(@Args('signupInput') signupInput: SignupInputDTO) {
+    console.log(signupInput, 'resolver');
     return this.authService.signup(signupInput);
   }
 }

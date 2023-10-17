@@ -23,7 +23,7 @@ type Query {
 }
 
 type Mutation {
-  createProfile(createProfileInput: CreateProfileInput!): ProfilePayload!
-  updateProfile(updateProfileInput: UpdateProfileInput!): ProfilePayload!
-  removeProfile(id: Int!): String!
+  profileCreate(createProfileInput: CreateProfileInput!): ProfilePayload!
+  profileUpdate(updateProfileInput: UpdateProfileInput!): ProfilePayload!
+  profileDelete(id: Int!): String!
 }

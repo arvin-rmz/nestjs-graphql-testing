@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
+import DataLoader from 'dataloader';
 import { User } from 'prisma/prisma-client';
+
 import { UserService } from 'src/user/user.service';
 import { IDataloaders } from './dataloader.interface';
-import DataLoader from 'dataloader';
-
-type BatchUsers = (ids: number[]) => Promise<User[]>;
 
 // REFERENCE ==> https://blog.logrocket.com/use-dataloader-nestjs/
+
+type BatchUsers = (ids: number[]) => Promise<User[]>;
 
 @Injectable()
 export class DataLoaderService {

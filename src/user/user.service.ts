@@ -2,7 +2,12 @@ import { Injectable, ConflictException } from '@nestjs/common';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { User } from 'prisma/prisma-client';
 import { CreateUserInput } from 'src/graphql';
+import { CustomError } from 'src/errors/custom-error';
+import { ErrorCode } from 'src/types/error.types';
+
 import { PrismaService } from 'src/prisma/prisma.service';
+import { BadRequestError } from 'src/errors/bad-request.error';
+import { UserExistError } from 'src/errors/user-exist.error';
 @Injectable()
 export class UserService {
   constructor(private prismaService: PrismaService) {}
@@ -22,7 +27,7 @@ export class UserService {
     return users;
   }
 
-  async findOne(id: number) {
+  async findUOne(id: number) {
     const user = await this.prismaService.user.findUnique({
       where: { id },
     });
@@ -32,6 +37,14 @@ export class UserService {
     const { password, ...restUser } = user;
 
     return restUser;
+  }
+
+  async findByEmail(email: string): Promise<User> | null {
+    const user = this.prismaService.user.findFirst({ where: { email } });
+
+    if (!user) return null;
+
+    return user;
   }
 
   async create(createUserInput: CreateUserInput) {
@@ -53,14 +66,14 @@ export class UserService {
         error instanceof PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
-        throw new ConflictException(
+        throw new UserExistError(
           `User ${createUserInput.email} already exists`,
         );
       }
     }
   }
 
-  async getUserByProfileId(profileId: number) {
+  async getByProfileId(profileId: number) {
     const profile = await this.prismaService.profile.findFirst({
       where: {
         id: profileId,

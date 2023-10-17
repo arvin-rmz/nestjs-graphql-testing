@@ -10,7 +10,6 @@ export const CurrentUser = createParamDecorator(
   (data, context: ExecutionContext) => {
     const ctx = GqlExecutionContext.create(context);
     const request = ctx.getContext().req;
-    console.log(request.user, 'current user');
 
     return request.user as IJwtPayload;
   },

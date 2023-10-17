@@ -17,6 +17,16 @@ input FindUserInput {
   id: ID!
 }
 
+type UserError {
+  message: String!
+  field: String
+}
+
+type UserPayload {
+  user: User
+  userErrors: [UserError!]!
+}
+
 type Query {
   me: User
   user(findUserInput: FindUserInput): User

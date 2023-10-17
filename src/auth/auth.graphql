@@ -1,7 +1,3 @@
-type Tokens {
-  accessToken: String
-}
-
 input LoginInput {
   email: String!
   password: String!
@@ -14,9 +10,15 @@ input SignupInput {
   lastName: String
 }
 
+type UserError {
+  message: String!
+  field: String
+}
+
 type AuthPayload {
-  userErrors: [UserErrors!]!
-  tokens: Tokens
+  userErrors: [UserError!]!
+  accessToken: String
+  refreshToken: String
   user: User
 }
 

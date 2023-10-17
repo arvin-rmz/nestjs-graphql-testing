@@ -1,15 +1,9 @@
 import { UseGuards } from '@nestjs/common';
-import {
-  Args,
-  Context,
-  Parent,
-  Query,
-  ResolveField,
-  Resolver,
-} from '@nestjs/graphql';
+import { Args, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import { User } from 'src/graphql';
+
 import { UserService } from './user.service';
 import { FindUserInputDTO } from './dto/find-one-user-input';
-import { User } from 'src/graphql';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth-guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { PostService } from 'src/post/post.service';
@@ -23,25 +17,25 @@ export class UserResolver {
   ) {}
 
   @Query('users')
-  findAll() {
+  getAllUsers() {
     return this.userService.findAll();
   }
 
   @Query('user')
-  findOne(@Args('findUserInput') findUserInput: FindUserInputDTO) {
-    return this.userService.findOne(Number(findUserInput.id));
+  getUser(@Args('findUserInput') findUserInput: FindUserInputDTO) {
+    return this.userService.findUOne(Number(findUserInput.id));
   }
 
   @Query('me')
   @UseGuards(JwtAuthGuard)
   me(@CurrentUser() currentUser: IJwtPayload) {
-    return this.userService.findOne(currentUser.sub);
+    return this.userService.findUOne(currentUser.sub);
   }
 
   @ResolveField('posts')
   async getPosts(@Parent() { id }: User) {
     const userId = Number(id);
-    const { posts } = await this.postService.findUserPosts(userId);
+    const { posts } = await this.postService.findAllByUserId(userId);
 
     return posts;
   }
