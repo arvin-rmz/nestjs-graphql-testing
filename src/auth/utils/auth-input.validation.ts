@@ -1,9 +1,6 @@
 import { plainToClass } from 'class-transformer';
 import { LoginInputDTO } from '../dto/login.input.dto';
 import { validate } from 'class-validator';
-import { BadRequestError } from 'src/errors/bad-request.error';
-import { AuthPayload } from 'src/graphql';
-import { ErrorCode } from 'src/types/error.types';
 
 interface ICredentials {
   email: string;

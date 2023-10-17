@@ -1,25 +1,17 @@
-import { ConfigService } from '@nestjs/config';
-import { LoginInputDTO } from './dto/login.input.dto';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { User } from 'prisma/prisma-client';
+import { Injectable } from '@nestjs/common';
 import { AuthPayload } from 'src/graphql';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
-import { PrismaService } from 'src/prisma/prisma.service';
 import { SignupInputDTO } from './dto/signup.input.dto';
 import { UserService } from 'src/user/user.service';
-import { CustomError } from 'src/errors/custom-error';
-import { ErrorCode } from 'src/types/error.types';
 import { BadRequestError } from 'src/errors/bad-request.error';
-import { validateAuthBodyAndParseErrors } from './utils/auth-input.validation';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
-    private readonly configService: ConfigService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {

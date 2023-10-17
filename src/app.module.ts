@@ -1,14 +1,11 @@
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { Module } from '@nestjs/common';
 import { join } from 'path';
-import { APP_INTERCEPTOR } from '@nestjs/core';
 import { GraphQLModule } from '@nestjs/graphql';
-import { GraphQLError, GraphQLFormattedError } from 'graphql';
+import { GraphQLFormattedError } from 'graphql';
 import { ConfigModule } from '@nestjs/config';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 
-// import { AppController } from './app.controller';
-// import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { PetModule } from './pet/pet.module';
 import { PrismaService } from './prisma/prisma.service';
@@ -19,7 +16,6 @@ import { UserService } from './user/user.service';
 import { ProfileModule } from './profile/profile.module';
 import { DataloaderModule } from './dataloader/dataloader.module';
 import { DataLoaderService } from './dataloader/dataloader.service';
-import { ErrorInterceptor } from './interceptors/error.interceptor';
 import { ErrorCode } from './types/error.types';
 
 export interface IOriginalError {
@@ -130,14 +126,6 @@ export interface IOriginalError {
     ProfileModule,
     DataloaderModule,
   ],
-  providers: [
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: ErrorInterceptor,
-    },
-
-    PrismaService,
-    UserService,
-  ],
+  providers: [PrismaService, UserService],
 })
 export class AppModule {}

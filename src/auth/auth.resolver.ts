@@ -1,11 +1,10 @@
 import { UseGuards } from '@nestjs/common';
-import { Args, Context, Mutation, Resolver, Query } from '@nestjs/graphql';
+import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
 
 import { AuthService } from './auth.service';
 import { LoginInputDTO } from './dto/login.input.dto';
 import { SignupInputDTO } from './dto/signup.input.dto';
 import { GqlAuthGuard } from './guards/gql-auth-guard';
-import { User } from 'prisma/prisma-client';
 
 @Resolver('Auth')
 export class AuthResolver {

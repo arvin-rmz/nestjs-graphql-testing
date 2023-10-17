@@ -40,7 +40,7 @@ describe('AuthResolver', () => {
   it('login successfully and return accessToken', () => {
     expect(resolver).toBeDefined();
 
-    expect(resolver.login(loginInputDTO)).toEqual({
+    expect(resolver.login(loginInputDTO, {})).toEqual({
       id: 'fake-id',
       ...loginInputDTO,
     });
