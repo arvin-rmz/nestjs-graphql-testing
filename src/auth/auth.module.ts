@@ -7,10 +7,12 @@ import { AuthResolver } from './auth.resolver';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { UsersModule } from 'src/users/users.module';
+import { RedisModule } from 'src/redis/redis.module';
 
 @Module({
   imports: [
     UsersModule,
+    RedisModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       signOptions: { expiresIn: process.env?.JWT_EXPIRES_IN },

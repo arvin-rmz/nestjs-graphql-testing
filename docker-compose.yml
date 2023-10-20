@@ -1,0 +1,29 @@
+version: '3.5'
+services:
+  nest-app:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    container_name: nest-app
+    ports:
+      - 5000:5000
+    links:
+      - redis
+    depends_on:
+      - db
+    environment:
+      - PORT=${PORT}
+  redis:
+    image: 'redis:latest'
+    container_name: 'redis'
+    ports:
+      - 6379:6379
+
+nest-backend:
+  container_name: nest-app
+  image: nest-api
+  # build:
+  #   dockerfile: Dockerfile
+  #   context: .
+  # ports:
+  #   - 5000:5000

@@ -8,16 +8,18 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth-guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { PostsService } from 'src/posts/posts.service';
 import { IJwtPayload } from 'src/auth/strategies/jwt.strategy';
+import { RedisService } from 'src/redis/redis.service';
 
 @Resolver('User')
 export class UsersResolver {
   constructor(
     private readonly usersService: UsersService,
     private readonly postsService: PostsService,
+    private readonly redisService: RedisService,
   ) {}
 
   @Query('users')
-  getAllUsers() {
+  async getAllUsers() {
     return this.usersService.findAll();
   }
 

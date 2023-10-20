@@ -17,6 +17,7 @@ import { ProfilesModule } from './profiles/profiles.module';
 import { DataloaderModule } from './dataloader/dataloader.module';
 import { DataLoaderService } from './dataloader/dataloader.service';
 import { ErrorCode } from './types/error.types';
+import { RedisModule } from './redis/redis.module';
 
 export interface IOriginalError {
   message: Partial<string[] & { field: string; message: string }[]>;
@@ -118,6 +119,7 @@ export interface IOriginalError {
       },
       inject: [DataLoaderService],
     }),
+
     PrismaModule,
     PetsModule,
     UsersModule,
@@ -125,6 +127,7 @@ export interface IOriginalError {
     AuthModule,
     ProfilesModule,
     DataloaderModule,
+    RedisModule,
   ],
   providers: [PrismaService, UsersService],
 })
