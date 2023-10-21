@@ -8,6 +8,7 @@ import { GqlAuthGuard } from './guards/gql-auth-guard';
 import { RedisService } from 'src/redis/redis.service';
 import { RtAuthGuard } from './guards/rt-auth-guard';
 import { AtAuthGuard } from './guards/at-auth-guard';
+import { IGraphQLContext } from 'src/types/gql-context.types';
 
 @Resolver('Auth')
 export class AuthResolver {
@@ -18,8 +19,10 @@ export class AuthResolver {
 
   @Mutation('login')
   @UseGuards(GqlAuthGuard)
-  async login(@Args('loginInput') _: LoginInputDTO, @Context() context) {
-    console.log(context.user, 'login');
+  async login(
+    @Args('loginInput') _: LoginInputDTO,
+    @Context() context: IGraphQLContext,
+  ) {
     return this.authService.login(context.user);
   }
 
@@ -30,14 +33,14 @@ export class AuthResolver {
 
   @Mutation('refresh')
   @UseGuards(RtAuthGuard)
-  refresh(@Context() context) {
+  refresh(@Context() context: IGraphQLContext) {
     const user = context.req.user;
     return this.authService.refresh(user);
   }
 
   @Mutation('logout')
   @UseGuards(AtAuthGuard)
-  logout(@Context() context) {
+  logout(@Context() context: IGraphQLContext) {
     const decodedUser = context.req.user;
     return this.authService.logout(decodedUser);
   }
