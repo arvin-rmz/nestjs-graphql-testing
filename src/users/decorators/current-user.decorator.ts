@@ -1,6 +1,6 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import { IJwtPayload } from 'src/auth/strategies/jwt.strategy';
+import { IJwtUserPayload } from 'src/auth/strategies/at-jwt.strategy';
 
 export interface ICurrentUser {
   email: string;
@@ -11,6 +11,6 @@ export const CurrentUser = createParamDecorator(
     const ctx = GqlExecutionContext.create(context);
     const request = ctx.getContext().req;
 
-    return request.user as IJwtPayload;
+    return request.user as IJwtUserPayload;
   },
 );

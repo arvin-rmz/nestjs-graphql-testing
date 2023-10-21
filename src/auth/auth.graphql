@@ -25,4 +25,6 @@ type AuthPayload {
 type Mutation {
   login(loginInput: LoginInput): AuthPayload!
   signup(signupInput: SignupInput): AuthPayload!
+  refresh: AuthPayload!
+  logout: String!
 }

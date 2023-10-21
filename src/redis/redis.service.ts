@@ -37,6 +37,12 @@ export class RedisService implements OnModuleDestroy {
     return parsedValue;
   }
 
+  async removeItem(key: string): Promise<any> {
+    await this.redis.del(key);
+
+    return true;
+  }
+
   async clear(): Promise<boolean> {
     await this.redis.flushAll();
 

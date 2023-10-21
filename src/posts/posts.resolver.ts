@@ -12,9 +12,9 @@ import {
 
 import { PostsService } from './posts.service';
 import { PostCreateInputDTO } from './dto/post-create-input';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth-guard';
+import { AtAuthGuard } from 'src/auth/guards/at-auth-guard';
 import { CurrentUser } from 'src/users/decorators/current-user.decorator';
-import { IJwtPayload } from 'src/auth/strategies/jwt.strategy';
+import { IJwtUserPayload } from 'src/auth/strategies/at-jwt.strategy';
 import { IDataloaders } from 'src/dataloader/dataloader.interface';
 
 @Resolver('Post')
@@ -22,10 +22,10 @@ export class PostsResolver {
   constructor(private readonly postService: PostsService) {}
 
   @Mutation('postCreate')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AtAuthGuard)
   createPost(
     @Args('postCreateInput') postCreateInput: PostCreateInputDTO,
-    @CurrentUser() currentUser: IJwtPayload,
+    @CurrentUser() currentUser: IJwtUserPayload,
   ) {
     const currentUserId = Number(currentUser.sub);
 

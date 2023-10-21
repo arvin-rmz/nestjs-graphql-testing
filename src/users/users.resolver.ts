@@ -4,10 +4,10 @@ import { User } from 'src/graphql';
 
 import { UsersService } from './users.service';
 import { FindUserInputDTO } from './dto/find-one-user-input';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth-guard';
+import { AtAuthGuard } from 'src/auth/guards/at-auth-guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { PostsService } from 'src/posts/posts.service';
-import { IJwtPayload } from 'src/auth/strategies/jwt.strategy';
+import { IJwtUserPayload } from 'src/auth/strategies/at-jwt.strategy';
 import { RedisService } from 'src/redis/redis.service';
 
 @Resolver('User')
@@ -29,8 +29,8 @@ export class UsersResolver {
   }
 
   @Query('me')
-  @UseGuards(JwtAuthGuard)
-  me(@CurrentUser() currentUser: IJwtPayload) {
+  @UseGuards(AtAuthGuard)
+  me(@CurrentUser() currentUser: IJwtUserPayload) {
     return this.usersService.findUOne(currentUser.sub);
   }
 

@@ -5,6 +5,7 @@ import { Strategy } from 'passport-local';
 import { AuthService } from '../auth.service';
 import { BadRequestError } from 'src/errors/bad-request.error';
 import { validateAuthBodyAndParseErrors } from '../utils/auth-input.validation';
+import { User } from 'prisma/prisma-client';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
@@ -25,11 +26,10 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
         field: authInputValidation.field,
       });
     }
-
     const user = await this.authService.validateUser(email, password);
 
     if (!user) throw new BadRequestError('Invalid email or password');
 
-    return user;
+    return user as Omit<User, 'password'>;
   }
 }

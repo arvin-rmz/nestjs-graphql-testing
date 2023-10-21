@@ -1,17 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { AuthPayload } from 'src/graphql';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 
 import { SignupInputDTO } from './dto/signup.input.dto';
 import { UsersService } from 'src/users/users.service';
 import { BadRequestError } from 'src/errors/bad-request.error';
+import { RedisService } from 'src/redis/redis.service';
+import { User } from 'prisma/prisma-client';
+import { IJwtUserPayload } from './strategies/at-jwt.strategy';
+import { ForbiddenError } from 'src/errors/forbidden.error';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly usersService: UsersService,
+    private readonly configService: ConfigService,
+    private readonly redisService: RedisService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
@@ -30,12 +37,18 @@ export class AuthService {
     return null;
   }
 
-  async login(user: any): Promise<any> {
-    const jwt = this.jwtService.sign({ email: user.email, sub: user.id });
+  async login(user: Omit<User, 'password'>): Promise<any> {
+    const { accessToken, refreshToken } = await this.generateAuthTokens({
+      email: user.email,
+      sub: user.id,
+    });
+
+    await this.redisService.setItem(user.id.toString(), refreshToken);
 
     return {
       userErrors: [],
-      accessToken: jwt,
+      accessToken,
+      refreshToken,
 
       user,
     } as unknown as AuthPayload;
@@ -57,15 +70,68 @@ export class AuthService {
       lastName,
     });
 
-    const accessToken = this.jwtService.sign({
+    const { accessToken, refreshToken } = await this.generateAuthTokens({
       email: user.email,
       sub: user.id,
     });
+
+    await this.redisService.setItem(user.id.toString(), refreshToken);
 
     return {
       userErrors: [],
       user: user as unknown as AuthPayload['user'],
       accessToken,
+      refreshToken,
+    };
+  }
+
+  async refresh(user: IJwtUserPayload): Promise<any> {
+    const existRefreshToken = await this.redisService.getItem(
+      user.sub.toString(),
+    );
+
+    if (!existRefreshToken) {
+      throw new ForbiddenError('Refresh token is not valid, please try login.');
+    }
+
+    const { accessToken, refreshToken } = await this.generateAuthTokens({
+      email: user.email,
+      sub: user.sub,
+    });
+
+    return {
+      accessToken,
+      refreshToken,
+    };
+  }
+
+  async logout(user: IJwtUserPayload) {
+    const result = await this.redisService.removeItem(user.sub.toString());
+
+    if (!result) {
+      throw new BadRequestError('User is not logged in');
+    }
+
+    return 'Logged out successfully.';
+  }
+
+  async generateAuthTokens(payload: {
+    email: string;
+    sub: number;
+  }): Promise<any> {
+    const accessToken = await this.jwtService.signAsync(payload, {
+      secret: this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET_KEY'),
+      expiresIn: this.configService.get<string>('JWT_ACCESS_TOKEN_EXPIRES_IN'),
+    });
+
+    const refreshToken = await this.jwtService.signAsync(payload, {
+      secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET_KEY'),
+      expiresIn: this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRES_IN'),
+    });
+
+    return {
+      accessToken,
+      refreshToken,
     };
   }
 }

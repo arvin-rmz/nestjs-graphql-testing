@@ -71,6 +71,10 @@ export abstract class IMutation {
 
     abstract signup(signupInput?: Nullable<SignupInput>): AuthPayload | Promise<AuthPayload>;
 
+    abstract refresh(): AuthPayload | Promise<AuthPayload>;
+
+    abstract logout(): string | Promise<string>;
+
     abstract createPet(createPetInput: CreatePetInput): PetPayload | Promise<PetPayload>;
 
     abstract updatePet(updatePetInput: UpdatePetInput): PetPayload | Promise<PetPayload>;
