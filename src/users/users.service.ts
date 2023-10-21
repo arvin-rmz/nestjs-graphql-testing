@@ -1,12 +1,9 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { User } from 'prisma/prisma-client';
 import { CreateUserInput } from 'src/graphql';
-import { CustomError } from 'src/errors/custom-error';
-import { ErrorCode } from 'src/types/error.types';
 
 import { PrismaService } from 'src/prisma/prisma.service';
-import { BadRequestError } from 'src/errors/bad-request.error';
 import { UserExistError } from 'src/errors/user-exist.error';
 @Injectable()
 export class UsersService {
@@ -49,18 +46,14 @@ export class UsersService {
 
   async create(createUserInput: CreateUserInput) {
     try {
-      const { password, ...createdUser } = await this.prismaService.user.create(
-        {
-          data: {
-            firstName: createUserInput.firstName,
-            lastName: createUserInput.lastName,
-            email: createUserInput.email,
-            password: createUserInput.password,
-          },
+      return await this.prismaService.user.create({
+        data: {
+          firstName: createUserInput.firstName,
+          lastName: createUserInput.lastName,
+          email: createUserInput.email,
+          password: createUserInput.password,
         },
-      );
-
-      return createdUser;
+      });
     } catch (error) {
       if (
         error instanceof PrismaClientKnownRequestError &&

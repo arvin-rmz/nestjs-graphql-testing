@@ -1,7 +1,37 @@
 import { Test, TestingModule } from '@nestjs/testing';
+
 import { AuthResolver } from './auth.resolver';
 import { AuthService } from './auth.service';
 import { LoginInputDTO } from './dto/login.input.dto';
+import { IGraphQLContext } from 'src/types/gql-context.types';
+import { RedisService } from 'src/redis/redis.service';
+
+const mockUser: {
+  firstName: string;
+  lastName: string | null;
+  email: string;
+  createdAt: Date;
+  updatedAt: Date;
+} = {
+  firstName: 'John',
+  lastName: 'Smith',
+  email: 'john@example.com',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
+
+const getMockGqlContext: () => Partial<IGraphQLContext> = () => ({
+  user: {
+    ...mockUser,
+    id: 1,
+  },
+});
+
+const getAuthPayload = () => ({
+  user: getMockGqlContext().user,
+  accessToken: 'accessToken',
+  refreshToken: 'refreshToken',
+});
 
 describe('AuthResolver', () => {
   let resolver: AuthResolver;
@@ -12,9 +42,8 @@ describe('AuthResolver', () => {
   loginInputDTO.password = '123456';
 
   const authService = {
-    login: jest.fn((loginInput) => ({
-      id: 'fake-id',
-      ...loginInputDTO,
+    login: jest.fn((userContext) => ({
+      ...getAuthPayload(),
     })),
   };
 
@@ -26,6 +55,13 @@ describe('AuthResolver', () => {
           provide: AuthService,
           useValue: authService,
         },
+        {
+          provide: RedisService,
+          useValue: {
+            setItem: jest.fn().mockReturnValue(true),
+            getItem: jest.fn().mockReturnValue('userRefreshToken'),
+          },
+        },
       ],
     }).compile();
 
@@ -33,18 +69,23 @@ describe('AuthResolver', () => {
     authMockService = module.get<AuthService>(AuthService);
   });
 
-  it('should be defined', () => {
-    expect(resolver).toBeDefined();
+  it('should call authService.login with user context', async () => {
+    const mockLogin = jest.fn().mockReturnValue(getAuthPayload());
+    jest.spyOn(authService, 'login').mockImplementation(mockLogin);
+
+    await resolver.login(loginInputDTO, getMockGqlContext() as IGraphQLContext);
+
+    expect(authService.login).toBeCalledWith(getMockGqlContext().user);
   });
 
-  it('login successfully and return accessToken', () => {
-    expect(resolver).toBeDefined();
+  it('login successfully and return user, access token and refresh token', async () => {
+    const response = await resolver.login(
+      loginInputDTO,
+      getMockGqlContext() as IGraphQLContext,
+    );
 
-    expect(resolver.login(loginInputDTO, {})).toEqual({
-      id: 'fake-id',
-      ...loginInputDTO,
-    });
-
-    expect(authMockService.login).toBeCalledWith(loginInputDTO);
+    expect(response).toHaveProperty('accessToken');
+    expect(response).toHaveProperty('refreshToken');
+    expect(response).toHaveProperty('user');
   });
 });

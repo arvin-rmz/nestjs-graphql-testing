@@ -1,22 +1,24 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import * as bcrypt from 'bcrypt';
+
 import { AuthService } from './auth.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { UserService } from 'src/user/users.service';
-import { JwtService } from '@nestjs/jwt';
-import { LoginPayload, UserPayload } from 'src/graphql';
-import * as bcrypt from 'bcrypt';
-import { UnauthorizedException } from '@nestjs/common';
+import { UsersService } from 'src/users/users.service';
+import { RedisService } from 'src/redis/redis.service';
+import { BadRequestError } from 'src/errors/bad-request.error';
 
 jest.mock('bcrypt', () => {
   return {
-    compare: (pass: string) => true,
+    compare: jest.fn().mockImplementation((password: string) => true),
     hash: jest.fn((pass: string, salt: number) => 'hashedPassword'),
   };
 });
 
 const mockUser: {
   firstName: string;
-  lastName?: string;
+  lastName: string | null;
   email: string;
   password: string;
   createdAt: Date;
@@ -30,30 +32,29 @@ const mockUser: {
   updatedAt: new Date(),
 };
 
-const mockCreateUser: () => UserPayload = () => {
-  const { password, ...user } = mockUser;
-
-  return {
-    userErrors: [],
-    user,
-  };
+const mockCreateUser = () => {
+  return { ...mockUser, id: 1 };
 };
 
-const getMockLoginInput = () => ({
-  email: 'john@example.com',
-  password: 'password',
-});
+const getMockLoginInput = () => {
+  const { password, ...user } = { ...mockUser };
+
+  return { ...user, id: 1 };
+};
 
 describe('AuthService', () => {
   let service: AuthService;
   let prismaService: PrismaService;
-  let userService: UserService;
+  let usersService: UsersService;
   let jwtService: JwtService;
+  let redisService: RedisService;
+  let configService: ConfigService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
+
         {
           provide: PrismaService,
           useValue: {
@@ -65,29 +66,42 @@ describe('AuthService', () => {
         },
 
         {
-          provide: UserService,
+          provide: UsersService,
           useValue: {
             create: jest.fn().mockReturnValue(mockCreateUser()),
+            findByEmail: jest.fn().mockReturnValue(mockCreateUser()),
           },
         },
 
         {
           provide: JwtService,
           useValue: {
-            sign: jest.fn().mockReturnValue('validJwtToken'),
+            signAsync: jest.fn().mockResolvedValue('validJwtToken'),
+          },
+        },
+
+        {
+          provide: RedisService,
+          useValue: {
+            setItem: jest.fn().mockReturnValue(true),
+            getItem: jest.fn().mockReturnValue('userRefreshToken'),
+          },
+        },
+
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn().mockReturnValue('Some environment variables'),
           },
         },
       ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
-    userService = module.get<UserService>(UserService);
+    usersService = module.get<UsersService>(UsersService);
     jwtService = module.get<JwtService>(JwtService);
     prismaService = module.get<PrismaService>(PrismaService);
-  });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+    redisService = module.get<RedisService>(RedisService);
   });
 
   describe('login()', () => {
@@ -98,8 +112,8 @@ describe('AuthService', () => {
 
       expect(response).toHaveProperty('userErrors');
       expect(response).toHaveProperty('user');
-      expect(response).toHaveProperty('tokens');
-      expect(response.tokens.accessToken).toBeDefined();
+      expect(response.accessToken).toBeDefined();
+      expect(response.refreshToken).toBeDefined();
       expect(response.user.email).toBeDefined();
       expect(response.user.firstName).toBeDefined();
       expect(response.user.lastName).toBeDefined();
@@ -108,17 +122,6 @@ describe('AuthService', () => {
     it('should not provide password field in login payload', async () => {
       const response = await service.login(mockUserToLogin);
       expect(response.user).not.toHaveProperty('password');
-    });
-
-    it('should throw unauthorized error when login input in not valid', async () => {
-      jest.spyOn(bcrypt, 'compare').mockImplementation(() => false);
-
-      await expect(
-        service.login({
-          email: mockUserToLogin.email,
-          password: 'invalidPassword',
-        }),
-      ).rejects.toThrowError(UnauthorizedException);
     });
   });
 
@@ -130,7 +133,7 @@ describe('AuthService', () => {
     });
 
     it('should hash the password, create user and create jwt token', async () => {
-      jest.spyOn(jwtService, 'sign').mockReturnValue('jwtToken');
+      jest.spyOn(jwtService, 'signAsync').mockResolvedValue('jwtToken');
       jest
         .spyOn(bcrypt, 'hash')
         .mockImplementation(jest.fn(() => 'hashedPassword'));
@@ -139,18 +142,22 @@ describe('AuthService', () => {
 
       expect(bcrypt.hash).toBeCalledWith(getUserToSignup().password, 12);
 
-      expect(userService.create).toBeCalledWith({
+      expect(usersService.create).toBeCalledWith({
         ...getUserToSignup(),
         password: 'hashedPassword',
       });
 
-      expect(jwtService.sign).toBeCalledWith({
-        email: getUserToSignup().email,
-      });
+      expect(jwtService.signAsync).toBeCalledWith(
+        expect.objectContaining({
+          email: getUserToSignup().email,
+          sub: mockCreateUser().id,
+        }),
+        expect.any(Object),
+      );
     });
 
-    it('should return correct signup payload when valid signup input provided, user info (without password) and access token.', async () => {
-      jest.spyOn(jwtService, 'sign').mockReturnValue('jwtToken');
+    it('should return correct signup payload when valid signup input provided, user info (without password) and access and refresh tokens.', async () => {
+      jest.spyOn(jwtService, 'signAsync').mockResolvedValue('jwtToken');
       jest
         .spyOn(bcrypt, 'hash')
         .mockImplementation(jest.fn(() => 'hashedPassword'));
@@ -159,15 +166,15 @@ describe('AuthService', () => {
 
       expect(response).toHaveProperty('userErrors');
       expect(response).toHaveProperty('user');
-      expect(response).toHaveProperty('tokens');
-      expect(response.tokens.accessToken).toBeDefined();
+      expect(response.accessToken).toBeDefined();
+      expect(response.refreshToken).toBeDefined();
       expect(response.user.email).toBeDefined();
       expect(response.user.firstName).toBeDefined();
       expect(response.user.lastName).toBeDefined();
     });
 
     it('should not include password in response when valid signup input provided', async () => {
-      jest.spyOn(jwtService, 'sign').mockReturnValue('jwtToken');
+      jest.spyOn(jwtService, 'signAsync').mockResolvedValue('jwtToken');
       jest
         .spyOn(bcrypt, 'hash')
         .mockImplementation(jest.fn(() => 'hashedPassword'));
@@ -179,36 +186,36 @@ describe('AuthService', () => {
   });
 
   describe('validateUser()', () => {
-    const mockUserToValidate = getMockLoginInput();
+    const mockUserToValidate = {
+      email: 'test@test.com',
+      password: 'password',
+    };
 
-    it('should return null when user is not exists', async () => {
-      jest
-        .spyOn(prismaService.user, 'findUnique')
-        .mockImplementation(() => null);
+    it('should throw a bad request error when user is not exists with the provided email.', async () => {
+      jest.spyOn(usersService, 'findByEmail').mockImplementation(() => null);
 
-      expect(
-        await service.validateUser(
+      await expect(
+        service.validateUser(
           mockUserToValidate.email,
           mockUserToValidate.password,
         ),
-      ).toBe(null);
+      ).rejects.toThrowError(BadRequestError);
     });
 
-    it('should return null when provided password did not match.', async () => {
-      const mockPrismaFindUniqueUser = jest.fn().mockReturnValue(mockUser);
-
+    it('should throw a bad request error when provided password did not match.', async () => {
+      const mockUserFindByEmail = jest.fn().mockReturnValue(mockCreateUser());
       jest
-        .spyOn(prismaService.user, 'findUnique')
-        .mockImplementation(mockPrismaFindUniqueUser);
+        .spyOn(usersService, 'findByEmail')
+        .mockImplementation(mockUserFindByEmail);
 
       jest.spyOn(bcrypt, 'compare').mockImplementation(() => false);
 
-      expect(
-        await service.validateUser(
+      await expect(
+        service.validateUser(
           mockUserToValidate.email,
           mockUserToValidate.password,
         ),
-      ).toBe(null);
+      ).rejects.toThrowError(BadRequestError);
     });
 
     it('should not provide password in response when user is valid', async () => {

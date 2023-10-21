@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { AuthPayload } from 'src/graphql';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { User } from 'prisma/prisma-client';
 import * as bcrypt from 'bcrypt';
 
 import { SignupInputDTO } from './dto/signup.input.dto';
 import { UsersService } from 'src/users/users.service';
 import { BadRequestError } from 'src/errors/bad-request.error';
 import { RedisService } from 'src/redis/redis.service';
-import { User } from 'prisma/prisma-client';
 import { IJwtUserPayload } from './strategies/at-jwt.strategy';
 import { ForbiddenError } from 'src/errors/forbidden.error';
 
@@ -43,6 +43,8 @@ export class AuthService {
       sub: user.id,
     });
 
+    // @ts-ignore
+
     await this.redisService.setItem(user.id.toString(), refreshToken);
 
     return {
@@ -56,11 +58,11 @@ export class AuthService {
 
   async signup({
     email,
-    password,
+    password: enteredPassword,
     firstName,
     lastName,
-  }: SignupInputDTO): Promise<AuthPayload> {
-    const hashedPassword = await bcrypt.hash(password, 12);
+  }: SignupInputDTO): Promise<any> {
+    const hashedPassword = await bcrypt.hash(enteredPassword, 12);
 
     // User.email is set to unique, and an error will be thrown if a user already exists through userService.create().
     const user = await this.usersService.create({
@@ -69,6 +71,8 @@ export class AuthService {
       firstName,
       lastName,
     });
+
+    const { password, ...userWithoutPassword } = user;
 
     const { accessToken, refreshToken } = await this.generateAuthTokens({
       email: user.email,
@@ -79,7 +83,7 @@ export class AuthService {
 
     return {
       userErrors: [],
-      user: user as unknown as AuthPayload['user'],
+      user: userWithoutPassword as unknown as AuthPayload['user'],
       accessToken,
       refreshToken,
     };
