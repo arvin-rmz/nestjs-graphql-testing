@@ -7,8 +7,8 @@ export class RedisService implements OnModuleDestroy {
     @Inject(REDIS_CLIENT) private readonly redis: RedisClient,
   ) {}
 
-  onModuleDestroy() {
-    this.redis.quit();
+  async onModuleDestroy() {
+    await this.redis.quit();
   }
 
   ping() {

@@ -27,7 +27,10 @@ export interface IOriginalError {
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env'] }),
+    ConfigModule.forRoot({
+      envFilePath: `.env.${process.env.NODE_ENV}`,
+      isGlobal: true,
+    }),
 
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
@@ -49,13 +52,14 @@ export interface IOriginalError {
             }
             console.log('error');
 
-            // return error;
+            return error;
 
             let graphQLFormattedError: ICustomError;
             if (error.message.startsWith('Cannot query field')) {
               graphQLFormattedError = {
                 code: ErrorCode.GRAPHQL_VALIDATION_FAILED,
-                message: 'Cannot query field',
+                message: error.message,
+                // message: 'Cannot query field',
               };
               return graphQLFormattedError;
             }
