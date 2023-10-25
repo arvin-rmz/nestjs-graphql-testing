@@ -1,4 +1,9 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import {
+  INestApplication,
+  Injectable,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from 'prisma/prisma-client';
 
@@ -7,8 +12,12 @@ export class PrismaService
   extends PrismaClient
   implements OnModuleInit, OnModuleDestroy
 {
+  private prisma: PrismaClient;
+
   constructor(private config: ConfigService) {
-    super({
+    super();
+
+    this.prisma = new PrismaClient({
       datasources: {
         db: {
           url: config.get<string>('DATABASE_URL'),
@@ -17,26 +26,37 @@ export class PrismaService
     });
   }
 
+  // async onModuleInit() {
+  //   await this.$connect();
+  // }
+
   async onModuleInit() {
-    await this.$connect();
+    if (process.env.NODE_ENV !== 'production') {
+      await this.prisma.$connect();
+    }
   }
 
   async onModuleDestroy() {
-    await this.$disconnect();
+    await this.prisma.$disconnect();
   }
 
   async cleanDatabase() {
     if (process.env.NODE_ENV === 'production') return;
+
+    const modelNames = {
+      user: 'user',
+    };
+
     const models = Reflect.ownKeys(this).filter(
-      (key) =>
-        key[0] !== '_' &&
-        key[0] !== '$' &&
-        typeof key !== 'symbol' &&
-        key !== 'config',
+      (key) => key === modelNames.user,
     );
 
-    // console.log(models.map((model) => model));
-    // console.log(models.map((modelKey) => this[modelKey].delete()));
-    return Promise.all(models.map((modelKey) => this[modelKey].deleteMany()));
+    return Promise.all(
+      models.map((modelKey) => this.prisma[modelKey].deleteMany()),
+    );
+  }
+
+  getClientInstance() {
+    return this.prisma;
   }
 }
