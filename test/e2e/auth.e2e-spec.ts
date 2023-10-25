@@ -33,8 +33,8 @@ describe('Authentication System', () => {
     await redisService.onModuleDestroy();
   });
 
-  describe('Signup flow', () => {
-    it('should handle a signup request', async () => {
+  describe('Signup Flow', () => {
+    it('should handle a signup mutation', async () => {
       let signupData: any;
 
       const signupInput: SignupInput = {
@@ -131,9 +131,7 @@ describe('Authentication System', () => {
           firstName: 'User',
         };
 
-        const initialSignupResponse = await request<{ signup: AuthPayload }>(
-          app.getHttpServer(),
-        )
+        await request<{ signup: AuthPayload }>(app.getHttpServer())
           .mutate(gql`
             mutation Signup($signupInput: SignupInput) {
               signup(signupInput: $signupInput) {
@@ -238,7 +236,7 @@ describe('Authentication System', () => {
     });
   });
 
-  describe('Login flow', () => {
+  describe('Login Flow', () => {
     const signupUser = async () => {
       const signupInput: SignupInput = {
         email: 'test@test.com',
@@ -276,7 +274,7 @@ describe('Authentication System', () => {
       return { existUser };
     };
 
-    it('should handle a login request', async () => {
+    it('should handle a login mutation', async () => {
       const { existUser } = await signupUser();
 
       const loginResponse = await request<{ login: AuthPayload }>(
@@ -345,11 +343,6 @@ describe('Authentication System', () => {
             },
           });
 
-        const expectBadRequest = {
-          code: ErrorCode.BAD_REQUEST,
-          message: /invalid email or password/i,
-        };
-
         const responseError = loginResponse.errors[0];
 
         expect(responseError).toHaveProperty('code', ErrorCode.BAD_REQUEST);
@@ -357,7 +350,7 @@ describe('Authentication System', () => {
       });
 
       it('should throw an Bad Request when invalid email is provided in login input.', async () => {
-        const { existUser } = await signupUser();
+        await signupUser();
 
         const invalidEmailUser = {
           email: 'testtest.com',
@@ -398,40 +391,41 @@ describe('Authentication System', () => {
       });
 
       it('should input value is less than 6 characters.', async () => {
-        //   const { existUser } = await signupUser();
-        //   const invalidPasswordUser = {
-        //     email: 'test@test.com',
-        //     password: '12345',
-        //   };
-        //   const loginResponse = await request<{ login: AuthPayload }>(
-        //     app.getHttpServer(),
-        //   )
-        //     .mutate(gql`
-        //       mutation Login($loginInput: LoginInput) {
-        //         login(loginInput: $loginInput) {
-        //           accessToken
-        //           refreshToken
-        //           user {
-        //             email
-        //             id
-        //             firstName
-        //           }
-        //         }
-        //       }
-        //     `)
-        //     .variables({
-        //       loginInput: {
-        //         email: invalidPasswordUser.email,
-        //         password: invalidPasswordUser.password,
-        //       },
-        //     });
-        //   const responseError = loginResponse.errors[0];
-        //   expect(responseError).toHaveProperty('code', ErrorCode.BAD_REQUEST);
-        //   expect(responseError).toHaveProperty('field', 'password');
-        //   expect(responseError).toHaveProperty(
-        //     'message',
-        //     'password must be longer than or equal to 6 characters',
-        //   );
+        await signupUser();
+
+        const invalidPasswordUser = {
+          email: 'test@test.com',
+          password: '12345',
+        };
+        const loginResponse = await request<{ login: AuthPayload }>(
+          app.getHttpServer(),
+        )
+          .mutate(gql`
+            mutation Login($loginInput: LoginInput) {
+              login(loginInput: $loginInput) {
+                accessToken
+                refreshToken
+                user {
+                  email
+                  id
+                  firstName
+                }
+              }
+            }
+          `)
+          .variables({
+            loginInput: {
+              email: invalidPasswordUser.email,
+              password: invalidPasswordUser.password,
+            },
+          });
+        const responseError = loginResponse.errors[0];
+        expect(responseError).toHaveProperty('code', ErrorCode.BAD_REQUEST);
+        expect(responseError).toHaveProperty('field', 'password');
+        expect(responseError).toHaveProperty(
+          'message',
+          'password must be longer than or equal to 6 characters',
+        );
       });
     });
   });
