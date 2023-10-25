@@ -8,6 +8,7 @@ import { SignupInputDTO } from 'src/auth/dto/signup.input.dto';
 import { UsersService } from 'src/users/users.service';
 import { AuthPayload } from 'src/graphql';
 import { User } from 'prisma/prisma-client';
+import { BadRequestError } from 'src/errors/bad-request.error';
 
 describe('signin() integration', () => {
   let prisma: PrismaService;
@@ -172,6 +173,58 @@ describe('signin() integration', () => {
 
       expect(redisUserData).not.toBeTruthy();
       expect(logoutPayload).toMatch(/logged out successfully/i);
+    });
+  });
+
+  describe('authService.validateUser() integration', () => {
+    interface IAuthPayload {
+      user: User;
+      accessToken: string;
+      refreshToken: string;
+    }
+
+    const signupUser = async (): Promise<IAuthPayload> => {
+      const userToSignup = new SignupInputDTO();
+      userToSignup.email = 'test@test.com';
+      userToSignup.password = 'password';
+      userToSignup.firstName = 'User';
+
+      return authService.signup({ ...userToSignup });
+    };
+
+    it('should return user without password when email and password are correct', async () => {
+      const { user } = await signupUser();
+      const userPassword = 'password';
+
+      const validatedUser = await authService.validateUser(
+        user.email,
+        userPassword,
+      );
+
+      expect(validatedUser).not.toHaveProperty('password');
+      expect(validatedUser).toHaveProperty('email', user.email);
+    });
+
+    it('should throw custom Bad Request Error when user does not exist with provided email', async () => {
+      await signupUser();
+
+      const notExistUser = {
+        email: 'not-exist-user@test.com',
+        password: 'password',
+      };
+
+      await expect(
+        authService.validateUser(notExistUser.email, notExistUser.password),
+      ).rejects.toThrow(BadRequestError);
+    });
+
+    it('should throw custom Bad Request Error when invalid password provided', async () => {
+      const { user } = await signupUser();
+      const invalidUserPassword = 'invalidPassword';
+
+      await expect(
+        authService.validateUser(user.email, invalidUserPassword),
+      ).rejects.toThrow(BadRequestError);
     });
   });
 });

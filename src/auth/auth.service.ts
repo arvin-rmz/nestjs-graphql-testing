@@ -30,9 +30,9 @@ export class AuthService {
 
     if (!validPassword) throw new BadRequestError('Invalid email or password');
 
-    const { password: passwordToExtract, ...userExtractedPassword } = user;
+    const { password: passwordToExtract, ...userWithoutPassword } = user;
 
-    return userExtractedPassword;
+    return userWithoutPassword;
 
     return null;
   }
