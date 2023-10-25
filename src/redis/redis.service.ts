@@ -16,7 +16,7 @@ export class RedisService implements OnModuleDestroy {
   }
 
   async setItem(key: string, value: any): Promise<any> {
-    if (!key) return;
+    if (!key) return null;
 
     const stringifyValue = JSON.stringify(value);
     await this.redis.set(key, stringifyValue);
@@ -25,14 +25,14 @@ export class RedisService implements OnModuleDestroy {
   }
 
   async getItem(key: string): Promise<any> {
-    if (!key) return false;
+    if (!key) return null;
 
     const value = await this.redis.get(key);
-    if (!value) return false;
+    if (!value) return null;
 
     const parsedValue = JSON.parse(value);
 
-    if (!parsedValue) return false;
+    if (!parsedValue) return null;
 
     return parsedValue;
   }

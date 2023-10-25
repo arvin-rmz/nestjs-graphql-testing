@@ -22,8 +22,8 @@
     "test:debug": "dotenv -e .env.test node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "pretest:e2e": "dotenv -e .env.test yarn db:reset && dotenv -e .env.test -- prisma migrate reset --force",
     "test:e2e": "dotenv -e .env.test -- jest -i --no-cache --watch --config ./jest.e2e.js",
-    "pretest:int": "dotenv -e .env.test -- prisma migrate reset --force",
-    "test:int": "dotenv -e .env.test -- jest -i --no-cache --watch --config ./jest-int.json",
+    "pretest:int": "dotenv -e .env.test yarn db:reset && dotenv -e .env.test -- prisma migrate reset --force",
+    "test:int": "dotenv -e .env.test -- jest -i --no-cache --watch --config ./jest-int.js",
     "test:supertest": "jest --config ./jest.supertest.js"
   },
   "dependencies": {

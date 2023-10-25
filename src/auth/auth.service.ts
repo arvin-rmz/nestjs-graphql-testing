@@ -43,8 +43,6 @@ export class AuthService {
       sub: user.id,
     });
 
-    // @ts-ignore
-
     await this.redisService.setItem(user.id.toString(), refreshToken);
 
     return {
@@ -53,7 +51,7 @@ export class AuthService {
       refreshToken,
 
       user,
-    } as unknown as AuthPayload;
+    };
   }
 
   async signup({
@@ -83,7 +81,7 @@ export class AuthService {
 
     return {
       userErrors: [],
-      user: userWithoutPassword as unknown as AuthPayload['user'],
+      user: userWithoutPassword,
       accessToken,
       refreshToken,
     };
