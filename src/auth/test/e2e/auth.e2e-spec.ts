@@ -1,4 +1,4 @@
-import { AuthPayload, SignupInput, LoginInput } from './../../src/graphql';
+import { AuthPayload, SignupInput, LoginInput } from '../../../graphql';
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
