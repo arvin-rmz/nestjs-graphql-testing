@@ -24,6 +24,6 @@ describe('signin() integration', () => {
   });
 
   it('should sign in a user correctly', async () => {
-    console.log(process.env.DATABASE_URL, 'ENV');
+    // console.log(process.env.DATABASE_URL, 'ENV');
   });
 });

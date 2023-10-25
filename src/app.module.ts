@@ -28,8 +28,8 @@ export interface IOriginalError {
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: `.env.${process.env.NODE_ENV}`,
       isGlobal: true,
+      envFilePath: `.env.${process.env.NODE_ENV}`,
     }),
 
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
@@ -52,7 +52,7 @@ export interface IOriginalError {
             }
             console.log('error');
 
-            return error;
+            // return error;
 
             let graphQLFormattedError: ICustomError;
             if (error.message.startsWith('Cannot query field')) {
@@ -68,7 +68,7 @@ export interface IOriginalError {
               const field = error.extensions.field;
               const message = error.message;
               const code = error.extensions.code as string;
-              console.log(error.message);
+
               graphQLFormattedError = {
                 code,
                 message,

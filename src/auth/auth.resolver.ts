@@ -9,7 +9,7 @@ import { RedisService } from 'src/redis/redis.service';
 import { RtAuthGuard } from './guards/rt-auth-guard';
 import { AtAuthGuard } from './guards/at-auth-guard';
 import { IGraphQLContext } from 'src/types/gql-context.types';
-console.log(process.env.NODE_ENV);
+
 @Resolver('Auth')
 export class AuthResolver {
   constructor(

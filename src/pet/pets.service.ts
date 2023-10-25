@@ -8,12 +8,12 @@ export class PetsService {
   constructor(private prisma: PrismaService) {}
 
   async create(createPetInput: CreatePetInput): Promise<PetPayload> {
-    console.log(createPetInput, 'pet created');
+    // console.log(createPetInput, 'pet created');
     try {
       const pet = await this.prisma.pet.create({
         data: { name: createPetInput.name },
       });
-      console.log(pet);
+      // console.log(pet);
       return {
         userErrors: [],
         Pet: pet,
