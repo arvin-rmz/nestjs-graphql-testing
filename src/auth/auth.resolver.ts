@@ -17,6 +17,11 @@ export class AuthResolver {
     private redisService: RedisService,
   ) {}
 
+  @Mutation('signup')
+  signup(@Args('signupInput') signupInput: SignupInputDTO) {
+    return this.authService.signup(signupInput);
+  }
+
   @Mutation('login')
   @UseGuards(GqlAuthGuard)
   async login(
@@ -26,9 +31,11 @@ export class AuthResolver {
     return this.authService.login(context.user);
   }
 
-  @Mutation('signup')
-  signup(@Args('signupInput') signupInput: SignupInputDTO) {
-    return this.authService.signup(signupInput);
+  @Mutation('logout')
+  @UseGuards(AtAuthGuard)
+  logout(@Context() context: IGraphQLContext) {
+    const decodedUser = context.req.user;
+    return this.authService.logout(decodedUser);
   }
 
   @Mutation('refresh')
@@ -36,12 +43,5 @@ export class AuthResolver {
   refresh(@Context() context: IGraphQLContext) {
     const user = context.req.user;
     return this.authService.refresh(user);
-  }
-
-  @Mutation('logout')
-  @UseGuards(AtAuthGuard)
-  logout(@Context() context: IGraphQLContext) {
-    const decodedUser = context.req.user;
-    return this.authService.logout(decodedUser);
   }
 }

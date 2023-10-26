@@ -37,23 +37,6 @@ export class AuthService {
     return null;
   }
 
-  async login(user: Omit<User, 'password'>): Promise<any> {
-    const { accessToken, refreshToken } = await this.generateAuthTokens({
-      email: user.email,
-      sub: user.id,
-    });
-
-    await this.redisService.setItem(user.id.toString(), refreshToken);
-
-    return {
-      userErrors: [],
-      accessToken,
-      refreshToken,
-
-      user,
-    };
-  }
-
   async signup({
     email,
     password: enteredPassword,
@@ -87,6 +70,33 @@ export class AuthService {
     };
   }
 
+  async login(user: Omit<User, 'password'>): Promise<any> {
+    const { accessToken, refreshToken } = await this.generateAuthTokens({
+      email: user.email,
+      sub: user.id,
+    });
+
+    await this.redisService.setItem(user.id.toString(), refreshToken);
+
+    return {
+      userErrors: [],
+      accessToken,
+      refreshToken,
+
+      user,
+    };
+  }
+
+  async logout(user: IJwtUserPayload) {
+    const result = await this.redisService.removeItem(user.sub.toString());
+
+    if (!result) {
+      throw new BadRequestError('User is not logged in');
+    }
+
+    return 'Logged out successfully.';
+  }
+
   async refresh(user: IJwtUserPayload): Promise<any> {
     const existRefreshToken = await this.redisService.getItem(
       user.sub.toString(),
@@ -105,16 +115,6 @@ export class AuthService {
       accessToken,
       refreshToken,
     };
-  }
-
-  async logout(user: IJwtUserPayload) {
-    const result = await this.redisService.removeItem(user.sub.toString());
-
-    if (!result) {
-      throw new BadRequestError('User is not logged in');
-    }
-
-    return 'Logged out successfully.';
   }
 
   async generateAuthTokens(payload: {

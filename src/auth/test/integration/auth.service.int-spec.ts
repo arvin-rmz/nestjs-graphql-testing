@@ -1,4 +1,3 @@
-import { REDIS_CLIENT, RedisClient } from 'src/redis//redis-client.type';
 import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
 import { PrismaService } from 'src/prisma/prisma.service';
