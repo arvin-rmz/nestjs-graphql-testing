@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { AuthResolver } from './auth.resolver';
-import { AuthService } from './auth.service';
-import { LoginInputDTO } from './dto/login.input.dto';
+import { AuthResolver } from '../../auth.resolver';
+import { AuthService } from '../../auth.service';
+import { LoginInputDTO } from '../../dto/login.input.dto';
 import { IGraphQLContext } from 'src/types/gql-context.types';
 import { RedisService } from 'src/redis/redis.service';
 

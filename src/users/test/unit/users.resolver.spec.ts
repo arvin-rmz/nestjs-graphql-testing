@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UsersResolver } from './users.resolver';
-import { UsersService } from './users.service';
+import { UsersResolver } from '../../users.resolver';
+import { UsersService } from '../../users.service';
 import { PostsService } from 'src/posts/posts.service';
 import { RedisService } from 'src/redis/redis.service';
 
