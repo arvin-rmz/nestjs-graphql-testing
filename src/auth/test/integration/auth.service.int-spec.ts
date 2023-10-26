@@ -10,7 +10,7 @@ import { AuthPayload } from 'src/graphql';
 import { User } from 'prisma/prisma-client';
 import { BadRequestError } from 'src/errors/bad-request.error';
 
-describe('signin() integration', () => {
+describe('AuthService integration', () => {
   let prisma: PrismaService;
   let redisService: RedisService;
   let authService: AuthService;
