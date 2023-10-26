@@ -42,6 +42,10 @@ export class AuthResolver {
   @UseGuards(RtAuthGuard)
   refresh(@Context() context: IGraphQLContext) {
     const user = context.req.user;
-    return this.authService.refresh(user);
+
+    const refreshToken =
+      context?.req?.headers?.authorization?.split('Bearer ')[1];
+
+    return this.authService.refresh(user, refreshToken);
   }
 }

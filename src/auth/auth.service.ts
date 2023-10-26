@@ -97,12 +97,15 @@ export class AuthService {
     return 'Logged out successfully.';
   }
 
-  async refresh(user: IJwtUserPayload): Promise<any> {
+  async refresh(
+    user: IJwtUserPayload,
+    currentRefreshToken: string,
+  ): Promise<any> {
     const existRefreshToken = await this.redisService.getItem(
       user.sub.toString(),
     );
 
-    if (!existRefreshToken) {
+    if (!existRefreshToken || existRefreshToken !== currentRefreshToken) {
       throw new ForbiddenError('Refresh token is not valid, please try login.');
     }
 
@@ -110,6 +113,10 @@ export class AuthService {
       email: user.email,
       sub: user.sub,
     });
+
+    await this.redisService.removeItem(user.sub.toString());
+
+    await this.redisService.setItem(user.sub.toString(), refreshToken);
 
     return {
       accessToken,
