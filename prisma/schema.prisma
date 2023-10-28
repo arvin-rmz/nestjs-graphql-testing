@@ -8,12 +8,12 @@ datasource db {
 }
 
 model Image {
-  id               Int       @id @default(autoincrement())
+  id               Int        @id @default(autoincrement())
   url              String
-  postId           Int
-  post             Post      @relation(fields: [postId], references: [id])
-  profileId        Int       @unique
-  profile          Profile   @relation(fields: [profileId], references: [id])
+  postId           Int?
+  post             Post?      @relation(fields: [postId], references: [id])
+  profileId        Int?       @unique
+  profile          Profile?   @relation(fields: [profileId], references: [id])
   video            Video?
 
     @@map("images")

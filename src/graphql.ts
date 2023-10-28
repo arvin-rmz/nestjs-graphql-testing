@@ -32,6 +32,13 @@ export class UpdatePetInput {
 export class PostCreateInput {
     title: string;
     content: string;
+    files: Upload[];
+}
+
+export class FileUploadInput {
+    title: string;
+    content: string;
+    files: Upload[];
 }
 
 export class CreateProfileInput {
@@ -83,6 +90,8 @@ export abstract class IMutation {
 
     abstract postCreate(postCreateInput: PostCreateInput): PostPayload | Promise<PostPayload>;
 
+    abstract fileUpload(files: FileUploadInput): boolean | Promise<boolean>;
+
     abstract profileCreate(createProfileInput: CreateProfileInput): ProfilePayload | Promise<ProfilePayload>;
 
     abstract profileUpdate(updateProfileInput: UpdateProfileInput): ProfilePayload | Promise<ProfilePayload>;
@@ -124,10 +133,18 @@ export abstract class IQuery {
     abstract users(): User[] | Promise<User[]>;
 }
 
+export class File {
+    filename: string;
+    mimetype: string;
+    encoding: string;
+    url: string;
+}
+
 export class Post {
     id: string;
     title: string;
     content: string;
+    files: File[];
     user: User;
 }
 
@@ -160,5 +177,6 @@ export class UserPayload {
     userErrors: UserError[];
 }
 
+export type Upload = any;
 export type PostResult = Post | UserError;
 type Nullable<T> = T | null;

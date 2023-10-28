@@ -1,19 +1,25 @@
+scalar Upload
+
+type File {
+  filename: String!
+  mimetype: String!
+  encoding: String!
+  url: String!
+}
+
 type Post {
   id: ID!
   title: String!
   content: String!
+  files: [File!]!
   user: User!
 }
 
 input PostCreateInput {
   title: String!
   content: String!
+  files: [Upload!]!
 }
-
-# interface Error {
-#   message: String!
-#   code: String!
-# }
 
 type UserError {
   message: String!
@@ -37,6 +43,12 @@ union PostResult = Post | UserError
 
 # union PostsResult = [Post] | UserError
 
+input FileUploadInput {
+  title: String!
+  content: String!
+  files: [Upload!]!
+}
+
 type Query {
   post(id: ID): Post
   posts: [Post]
@@ -44,4 +56,6 @@ type Query {
 
 type Mutation {
   postCreate(postCreateInput: PostCreateInput!): PostPayload!
+  fileUpload(files: FileUploadInput!): Boolean!
+  # fileUpload(files: [Upload!]!): Boolean!
 }

@@ -4,7 +4,10 @@ import { join } from 'path';
 import { GraphQLModule } from '@nestjs/graphql';
 import { GraphQLFormattedError } from 'graphql';
 import { ConfigModule } from '@nestjs/config';
-import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
+import {
+  ApolloServerPluginLandingPageLocalDefault,
+  ApolloServerPluginLandingPageProductionDefault,
+} from '@apollo/server/plugin/landingPage/default';
 
 import { PrismaModule } from './prisma/prisma.module';
 import { PetsModule } from './pet/pets.module';
@@ -18,6 +21,7 @@ import { DataloaderModule } from './dataloader/dataloader.module';
 import { DataLoaderService } from './dataloader/dataloader.service';
 import { ErrorCode } from './types/error.types';
 import { RedisModule } from './redis/redis.module';
+import { LiaraFileStorageModule } from './liara-file-storage/liara-file-storage.module';
 
 export interface IOriginalError {
   message: Partial<string[] & { field: string; message: string }[]>;
@@ -35,11 +39,26 @@ export interface IOriginalError {
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
       imports: [DataloaderModule],
+
       useFactory: (dataLoaderService: DataLoaderService) => {
         return {
+          // introspection: true,
           typePaths: ['./**/*.graphql'],
           playground: false,
-          plugins: [ApolloServerPluginLandingPageLocalDefault()],
+
+          // plugins: [ApolloServerPluginLandingPageLocalDefault()],
+          plugins: [
+            // Install a landing page plugin based on NODE_ENV
+            process.env.NODE_ENV === 'production'
+              ? ApolloServerPluginLandingPageProductionDefault({
+                  graphRef: 'my-graph-id@my-graph-variant',
+                  footer: false,
+                })
+              : ApolloServerPluginLandingPageLocalDefault({
+                  footer: true,
+                  includeCookies: true,
+                }),
+          ],
           definitions: {
             path: join(process.cwd(), 'src/graphql.ts'),
             outputAs: 'class',
@@ -50,7 +69,7 @@ export interface IOriginalError {
               code?: string;
               field?: string;
             }
-            console.log('error');
+            // console.log('error', error);
 
             // return error;
 
@@ -132,6 +151,7 @@ export interface IOriginalError {
     ProfilesModule,
     DataloaderModule,
     RedisModule,
+    LiaraFileStorageModule,
   ],
   providers: [PrismaService, UsersService],
 })

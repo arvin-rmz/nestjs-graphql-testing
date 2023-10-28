@@ -1,5 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsString, IsNotEmpty } from 'class-validator';
+// import GraphQLUpload from 'graphql-upload/GraphQLUpload.mjs';
 
 @InputType('CreateUserInput')
 export class PostCreateInputDTO {
@@ -12,4 +13,7 @@ export class PostCreateInputDTO {
   @IsString()
   @IsNotEmpty()
   content: string;
+
+  image: any;
+  file: any;
 }
