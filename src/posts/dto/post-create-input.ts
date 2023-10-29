@@ -1,19 +1,21 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsString, IsNotEmpty } from 'class-validator';
-// import GraphQLUpload from 'graphql-upload/GraphQLUpload.mjs';
+import { Exclude } from 'class-transformer';
 
-@InputType('CreateUserInput')
+import { Upload } from './post-create-files-input';
+
+@InputType('postCreateInput')
 export class PostCreateInputDTO {
-  @Field()
+  // @Field()
   @IsString()
   @IsNotEmpty()
   title: string;
 
-  @Field()
+  // @Field()
   @IsString()
   @IsNotEmpty()
   content: string;
 
-  image: any;
-  file: any;
+  @Exclude()
+  files: Upload[];
 }

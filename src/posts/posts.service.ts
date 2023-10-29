@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PostCreateInput } from 'src/graphql';
-import { LiaraFileStorageService } from 'src/liara-file-storage/liara-file-storage.service';
 
+import { LiaraFileStorageService } from 'src/liara-file-storage/liara-file-storage.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ErrorCode } from 'src/types/error.types';
 import { UsersService } from 'src/users/users.service';
@@ -42,10 +41,11 @@ export class PostsService {
         },
       });
 
-      const filesPathList = await this.liaraFileStorage.uploadFiles(files);
+      const uploadedFilesList = await this.liaraFileStorage.uploadFiles(files);
 
-      const imagesToCreate = filesPathList.map((filePath) => ({
-        url: this._createPostImageUrl(filePath),
+      const imagesToCreate = uploadedFilesList.map((uploadedFile) => ({
+        url: this._createPostImageUrl(uploadedFile.path),
+        index: uploadedFile.index,
         postId: post.id,
       }));
 
@@ -59,6 +59,7 @@ export class PostsService {
       };
     } catch (error) {
       console.log(error);
+      throw error;
     }
   }
 
@@ -126,6 +127,7 @@ export class PostsService {
         filename: image.url,
         encoding: 'e',
         url: image.url,
+        index: image.index,
       };
     });
 

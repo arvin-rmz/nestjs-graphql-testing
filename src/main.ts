@@ -13,15 +13,10 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const isDevelopment = process.env.NODE_ENV === 'development';
   setupApp(app);
-  // app.use(multer().any());
-  // @ts-ignore
-  // const { default: graphqlUploadExpress } = await import(
-  //   'graphql-upload/graphqlUploadExpress.js'
-  // );
 
   app.use(
     '/graphql',
-    graphqlUploadExpress({ maxFileSize: 1000000, maxFiles: 10 }),
+    graphqlUploadExpress({ maxFileSize: 2000000000, maxFiles: 10 }),
   );
 
   app.enableCors({

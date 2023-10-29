@@ -19,8 +19,24 @@ import { AtAuthGuard } from 'src/auth/guards/at-auth-guard';
 import { CurrentUser } from 'src/users/decorators/current-user.decorator';
 import { IJwtUserPayload } from 'src/auth/strategies/at-jwt.strategy';
 import { IDataloaders } from 'src/dataloader/dataloader.interface';
-import { FileUpload, GraphQLUpload } from 'graphql-upload';
+
 import { LiaraFileStorageService } from 'src/liara-file-storage/liara-file-storage.service';
+import { PostCreateFilesInput } from './dto/post-create-files-input';
+import {
+  validatePostFiles,
+  validatePostFilesFormat,
+} from './utils/validate-post-files';
+import { BadRequestError } from 'src/errors/bad-request.error';
+import { allowedFilesFormats } from './utils/post.constants';
+
+interface Upload {
+  Upload: {
+    resolve: Function;
+    reject: Function;
+    promise: Promise<any>;
+    file: object;
+  };
+}
 
 @Resolver('Post')
 export class PostsResolver {
@@ -29,13 +45,19 @@ export class PostsResolver {
   @Mutation('postCreate')
   @UseGuards(AtAuthGuard)
   async postCreate(
-    @Args('postCreateInput') postCreateInput: any,
+    @Args('postCreateInput') postCreateInput: PostCreateInputDTO,
+    @Args('postCreateInput') { files }: PostCreateFilesInput,
     @CurrentUser() currentUser: IJwtUserPayload,
   ) {
     const currentUserId = Number(currentUser.sub);
 
+    await validatePostFiles(files);
     try {
-      return this.postService.create(postCreateInput, currentUserId);
+      console.log('resolver');
+      return this.postService.create(
+        { ...postCreateInput, files },
+        currentUserId,
+      );
     } catch (error) {
       console.log(error, 'postCreate Mutation');
     }

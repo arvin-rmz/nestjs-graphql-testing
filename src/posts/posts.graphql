@@ -5,6 +5,7 @@ type File {
   mimetype: String!
   encoding: String!
   url: String!
+  index: Int!
 }
 
 type Post {

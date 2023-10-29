@@ -138,6 +138,7 @@ export class File {
     mimetype: string;
     encoding: string;
     url: string;
+    index: number;
 }
 
 export class Post {

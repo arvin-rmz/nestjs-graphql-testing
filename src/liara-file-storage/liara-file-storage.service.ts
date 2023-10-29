@@ -6,6 +6,8 @@ import {
 } from '@aws-sdk/client-s3';
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
+import { CustomError } from 'src/errors/custom-error';
+import { ErrorCode } from 'src/types/error.types';
 
 @Injectable()
 export class LiaraFileStorageService {
@@ -39,9 +41,9 @@ export class LiaraFileStorageService {
   }
 
   async uploadFiles(files: any[]) {
-    const imagePathList: string[] = [];
+    const uploadedFilesList: { index: number; path: string }[] = [];
 
-    const uploadFilesPromises = files.map(async (file: any) => {
+    const uploadFilesPromises = files.map(async (file: any, index) => {
       const fileToUpload = await file.promise;
       const { filename, mimetype, encoding, createReadStream } = fileToUpload;
 
@@ -57,13 +59,11 @@ export class LiaraFileStorageService {
 
         const formattedPath = this._formatUrl(filename);
 
-        const imagePath = `${randomUUID()}.${decodeURIComponent(
-          formattedPath,
-        )}`;
+        const path = `${randomUUID()}.${decodeURIComponent(formattedPath)}`;
 
-        imagePathList.push(imagePath);
+        uploadedFilesList.push({ path, index });
 
-        const liaraResponse = await this.uploadObject(imageBuffer, imagePath);
+        const liaraResponse = await this.uploadObject(imageBuffer, path);
 
         return {
           filename: filename ?? '',
@@ -80,9 +80,15 @@ export class LiaraFileStorageService {
       }
     });
 
-    await Promise.all(uploadFilesPromises);
+    try {
+      await Promise.all(uploadFilesPromises);
 
-    return imagePathList;
+      return uploadedFilesList;
+    } catch (error) {
+      throw new CustomError(`Liara server error: ${error.message}`, {
+        code: ErrorCode.INTERNAL_SERVER_ERROR,
+      });
+    }
   }
 
   async uploadObject(binaryString: Buffer, objectKey?: string): Promise<any> {
@@ -92,11 +98,11 @@ export class LiaraFileStorageService {
       Key: objectKey,
     };
 
-    try {
-      return await this.client.send(new PutObjectCommand(params));
-    } catch (error) {
-      console.log(error);
-    }
+    // try {
+    return await this.client.send(new PutObjectCommand(params));
+    // } catch (error) {
+    //   console.log(error);
+    // }
   }
 
   private _formatUrl(url: string): string {
