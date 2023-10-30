@@ -8,6 +8,14 @@ import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
 import { CustomError } from 'src/errors/custom-error';
 import { ErrorCode } from 'src/types/error.types';
+import { getFileType } from 'src/posts/utils/file.utils';
+import { FileType } from 'prisma/prisma-client';
+
+interface IUploadedFiles {
+  index: number;
+  path: string;
+  fileType: FileType;
+}
 
 @Injectable()
 export class LiaraFileStorageService {
@@ -24,24 +32,8 @@ export class LiaraFileStorageService {
     });
   }
 
-  async getObject() {
-    const params = {
-      // Body: binaryString,
-      Bucket: this.configService.get('LIARA_BUCKET_NAME'),
-      Key: 'objectKey',
-    };
-
-    try {
-      const data = await this.client.send(new GetObjectCommand(params));
-      console.log(data.Body.toString());
-      return data.Body.toString();
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
   async uploadFiles(files: any[]) {
-    const uploadedFilesList: { index: number; path: string }[] = [];
+    const uploadedFilesList: IUploadedFiles[] = [];
 
     const uploadFilesPromises = files.map(async (file: any, index) => {
       const fileToUpload = await file.promise;
@@ -61,9 +53,11 @@ export class LiaraFileStorageService {
 
         const path = `${randomUUID()}.${decodeURIComponent(formattedPath)}`;
 
-        uploadedFilesList.push({ path, index });
-
         const liaraResponse = await this.uploadObject(imageBuffer, path);
+
+        const fileType = getFileType(filename);
+
+        uploadedFilesList.push({ path, index, fileType });
 
         return {
           filename: filename ?? '',
@@ -103,6 +97,21 @@ export class LiaraFileStorageService {
     // } catch (error) {
     //   console.log(error);
     // }
+  }
+
+  async getObject() {
+    const params = {
+      // Body: binaryString,
+      Bucket: this.configService.get('LIARA_BUCKET_NAME'),
+      Key: 'objectKey',
+    };
+
+    try {
+      const data = await this.client.send(new GetObjectCommand(params));
+      return data.Body.toString();
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   private _formatUrl(url: string): string {

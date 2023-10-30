@@ -8,6 +8,12 @@
 /* tslint:disable */
 /* eslint-disable */
 
+export enum FileType {
+    IMAGE = "IMAGE",
+    VIDEO = "VIDEO",
+    DOCUMENT = "DOCUMENT"
+}
+
 export class LoginInput {
     email: string;
     password: string;
@@ -32,7 +38,7 @@ export class UpdatePetInput {
 export class PostCreateInput {
     title: string;
     content: string;
-    files: Upload[];
+    files?: Nullable<Nullable<Upload>[]>;
 }
 
 export class FileUploadInput {
@@ -138,6 +144,7 @@ export class File {
     mimetype: string;
     encoding: string;
     url: string;
+    type: FileType;
     index: number;
 }
 

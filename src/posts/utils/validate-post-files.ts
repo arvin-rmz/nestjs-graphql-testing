@@ -4,6 +4,8 @@ import { allowedDocumentsFormats, allowedFilesFormats } from './post.constants';
 import { ReadStream } from 'fs';
 
 export const validatePostFiles = async (files: Upload[]) => {
+  if (typeof files === 'undefined') return;
+
   const filesFormatIsValid = validatePostFilesFormat(
     files,
     allowedFilesFormats,
@@ -34,6 +36,11 @@ export const validatePostFilesFormat = (
   let filesFormatIsValid = true;
 
   files.forEach((file) => {
+    if (typeof file === 'string')
+      throw new BadRequestError(
+        "Invalid files format. If you don't want to send files please provide an empty array or remove the files field entirely",
+      );
+
     if (!file.file) return;
 
     const fileName = file.file.filename;

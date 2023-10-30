@@ -5,16 +5,15 @@ import { LiaraFileStorageService } from 'src/liara-file-storage/liara-file-stora
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ErrorCode } from 'src/types/error.types';
 import { UsersService } from 'src/users/users.service';
+import { Upload } from './dto/post-create-files-input';
+import { CustomError } from 'src/errors/custom-error';
+import { FileType } from 'prisma/prisma-client';
+import { getFileFormat, getFileType } from './utils/file.utils';
 
-class CustomError extends Error {
-  extensions: {
-    code: string;
-  };
-
-  constructor(message: string, extensions: { code: string }) {
-    super(message);
-    this.extensions = extensions;
-  }
+interface ICreatePostParam {
+  title: string;
+  content: string;
+  files: Upload[];
 }
 
 @Injectable()
@@ -26,11 +25,8 @@ export class PostsService {
     private readonly liaraFileStorage: LiaraFileStorageService,
   ) {}
 
-  async create(
-    postCreateInput: { title: string; content: string; files: any[] },
-    currentUserId: number,
-  ) {
-    const { title, content, files } = postCreateInput;
+  async create(createPostParam: ICreatePostParam, currentUserId: number) {
+    const { title, content, files } = createPostParam;
 
     try {
       const post = await this.prisma.post.create({
@@ -43,14 +39,15 @@ export class PostsService {
 
       const uploadedFilesList = await this.liaraFileStorage.uploadFiles(files);
 
-      const imagesToCreate = uploadedFilesList.map((uploadedFile) => ({
+      const filesToCreate = uploadedFilesList.map((uploadedFile) => ({
         url: this._createPostImageUrl(uploadedFile.path),
         index: uploadedFile.index,
         postId: post.id,
+        type: uploadedFile.fileType,
       }));
 
-      const images = await this.prisma.image.createMany({
-        data: imagesToCreate,
+      const createdFiles = await this.prisma.file.createMany({
+        data: filesToCreate,
       });
 
       return {
@@ -96,7 +93,11 @@ export class PostsService {
   }
 
   async findAll() {
-    const posts = await this.prisma.post.findMany({});
+    const posts = await this.prisma.post.findMany({
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
 
     return posts;
   }
@@ -115,19 +116,23 @@ export class PostsService {
   }
 
   async getPostFiles(postId: number) {
-    const images = await this.prisma.image.findMany({
+    const files = await this.prisma.file.findMany({
       where: {
         postId,
       },
+      orderBy: {
+        index: 'asc',
+      },
     });
 
-    const response = images.map((image) => {
+    const response = files.map((file) => {
       return {
         mimetype: '.png',
-        filename: image.url,
+        filename: file.url,
         encoding: 'e',
-        url: image.url,
-        index: image.index,
+        url: file.url,
+        index: file.index,
+        type: file.type,
       };
     });
 

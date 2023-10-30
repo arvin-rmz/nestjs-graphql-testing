@@ -7,9 +7,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Image {
+model File {
   id               Int        @id @default(autoincrement())
   url              String
+  type             FileType
   index            Int
   postId           Int?
   post             Post?      @relation(fields: [postId], references: [id])
@@ -17,18 +18,33 @@ model Image {
   profile          Profile?   @relation(fields: [profileId], references: [id])
   video            Video?
 
-    @@map("images")
+  @@map("files")
+}
+
+model Image {
+  id               Int        @id @default(autoincrement())
+  url              String
+  index            Int
+  postId           Int?
+  post             Post?      @relation(fields: [postId], references: [id])
+  profileId        Int?       @unique
+  // profile          Profile?   @relation(fields: [profileId], references: [id])
+  // video            Video?
+
+  @@map("images")
 }
 
 model Video {
   id               Int       @id @default(autoincrement())
   url              String
-  coverImageId     Int       @unique
-  coverImage       Image     @relation(fields: [coverImageId], references: [id])
+  // coverImageId     Int       @unique
+  // coverImage       Image     @relation(fields: [coverImageId], references: [id])
   postId           Int       @unique
   post             Post      @relation(fields: [postId], references: [id])
+  imageId          Int       @unique
+  image            File      @relation(fields: [imageId], references: [id])
 
-    @@map("videos")
+  @@map("videos")
 }
 
 model Pet {
@@ -48,6 +64,7 @@ model Post {
   userId           Int
   user             User          @relation(fields: [userId], references: [id])
   video            Video?
+  files            File[]
 
   @@map("posts")
 }
@@ -64,7 +81,7 @@ model User {
   profile          Profile?
   courses          Course[]  
 
-    @@map("users")
+  @@map("users")
 }
 
 model Profile {
@@ -74,16 +91,18 @@ model Profile {
   updatedAt        DateTime   @updatedAt
   userId           Int        @unique
   user             User       @relation(fields: [userId], references: [id])
-  image            Image?
+  // image            Image?
+  image             File?
+  // file             File?
 
-    @@map("profiles")
+  @@map("profiles")
 }
 
 model Creator {
   id               Int         @id @default(autoincrement())
   courses          Course[]
 
-    @@map("creators")
+  @@map("creators")
 }
 
 model Course {
@@ -94,9 +113,13 @@ model Course {
   creatorId        Int 
   creator          Creator     @relation(fields: [creatorId], references: [id])
 
-    @@map("courses")
+  @@map("courses")
 }
 
-
+enum FileType {
+  IMAGE
+  VIDEO
+  DOCUMENT
+}
 
 

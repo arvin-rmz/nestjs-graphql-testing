@@ -5,6 +5,7 @@ type File {
   mimetype: String!
   encoding: String!
   url: String!
+  type: FileType!
   index: Int!
 }
 
@@ -19,7 +20,7 @@ type Post {
 input PostCreateInput {
   title: String!
   content: String!
-  files: [Upload!]!
+  files: [Upload]
 }
 
 type UserError {
@@ -39,6 +40,12 @@ type PostPayload {
 # type PostPayloadSuccess {
 #   post: Post!
 # }
+
+enum FileType {
+  IMAGE
+  VIDEO
+  DOCUMENT
+}
 
 union PostResult = Post | UserError
 

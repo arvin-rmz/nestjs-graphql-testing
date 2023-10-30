@@ -51,11 +51,11 @@ export class PostsResolver {
   ) {
     const currentUserId = Number(currentUser.sub);
 
-    await validatePostFiles(files);
     try {
-      console.log('resolver');
+      await validatePostFiles(files);
+
       return this.postService.create(
-        { ...postCreateInput, files },
+        { ...postCreateInput, files: files || [] },
         currentUserId,
       );
     } catch (error) {
