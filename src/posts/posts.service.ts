@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { File } from 'prisma/prisma-client';
 
 import { LiaraFileStorageService } from 'src/liara-file-storage/liara-file-storage.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ErrorCode } from 'src/types/error.types';
 import { UsersService } from 'src/users/users.service';
+import { FileType, File as GraphqlFileType } from 'src/graphql';
 import { Upload } from './dto/post-create-files-input';
 import { CustomError } from 'src/errors/custom-error';
 
@@ -105,28 +107,73 @@ export class PostsService {
     };
   }
 
-  async getPostFiles(postId: number) {
+  // async getPostFiles(postId: number): Promise<ResponseFileType[]> {
+  //   const files = await this.prisma.file.findMany({
+  //     where: {
+  //       postId,
+  //     },
+  //     orderBy: {
+  //       index: 'asc',
+  //     },
+  //   });
+
+  //   const response = files.map((file) => {
+  //     return {
+  //       mimetype: '.png',
+  //       filename: file.url,
+  //       encoding: 'e',
+  //       url: file.url,
+  //       index: file.index,
+  //       type: file.type as FileType,
+  //     };
+  //   });
+
+  //   return response;
+  // }
+
+  async getAllByBatch(postIds: number[]) {
     const files = await this.prisma.file.findMany({
       where: {
-        postId,
+        postId: {
+          in: postIds,
+        },
       },
       orderBy: {
         index: 'asc',
       },
     });
 
-    const response = files.map((file) => {
-      return {
-        mimetype: '.png',
-        filename: file.url,
+    return this._sortPostFilesByIds(files, postIds);
+  }
+
+  private _sortPostFilesByIds(
+    files: File[],
+    postIds: number[],
+  ): GraphqlFileType[][] {
+    const fileMap: Record<string, GraphqlFileType[]> = {};
+
+    files.forEach((file) => {
+      const fileResponse: GraphqlFileType = {
         encoding: 'e',
-        url: file.url,
+        mimetype: '.example',
+        filename: file.url,
+        type: file.type as FileType,
         index: file.index,
-        type: file.type,
+        url: file.url,
       };
+
+      if (fileMap[file.postId]) {
+        fileMap[file.postId] = [...fileMap[file.postId], fileResponse];
+      } else {
+        fileMap[file.postId] = [fileResponse];
+      }
     });
 
-    return response;
+    const sortedPostFilesByPostIds = postIds.map(
+      (postId) => fileMap[postId] || [],
+    );
+
+    return sortedPostFilesByPostIds;
   }
 
   private _createPostImageUrl(path: string) {

@@ -13,9 +13,9 @@ import {
 import { CurrentUser } from 'src/users/decorators/current-user.decorator';
 import { IJwtUserPayload } from 'src/auth/strategies/at-jwt.strategy';
 import { IDataloaders } from 'src/dataloader/dataloader.interface';
+import { AtAuthGuard } from 'src/auth/guards/at-auth-guard';
 import { PostsService } from './posts.service';
 import { PostCreateInputDTO } from './dto/post-create-input';
-import { AtAuthGuard } from 'src/auth/guards/at-auth-guard';
 import { PostCreateFilesInput } from './dto/post-create-files-input';
 import { validatePostFiles } from './utils/validate-post-files';
 
@@ -59,11 +59,11 @@ export class PostsResolver {
   }
 
   @ResolveField('files')
-  getFiles(
+  async getPostFiles(
     @Parent() { id }: Post,
     @Context() { loaders }: { loaders: IDataloaders },
   ) {
-    // return loaders.userLoader.load(Number(userId));
-    return this.postService.getPostFiles(id);
+    // return this.postService.getPostFiles(id);
+    return loaders.postFilesLoader.load(id);
   }
 }

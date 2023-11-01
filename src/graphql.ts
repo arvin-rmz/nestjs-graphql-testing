@@ -152,7 +152,7 @@ export class Post {
     id: string;
     title: string;
     content: string;
-    files: File[];
+    files?: Nullable<Nullable<File>[]>;
     user: User;
 }
 
