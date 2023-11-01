@@ -28,28 +28,16 @@ type UserError {
   code: String!
 }
 
-# type UserErrors {
-#   message: String!
-# }
-
 type PostPayload {
   userErrors: [UserError!]!
   post: Post
 }
-
-# type PostPayloadSuccess {
-#   post: Post!
-# }
 
 enum FileType {
   IMAGE
   VIDEO
   DOCUMENT
 }
-
-union PostResult = Post | UserError
-
-# union PostsResult = [Post] | UserError
 
 input FileUploadInput {
   title: String!
@@ -65,5 +53,4 @@ type Query {
 type Mutation {
   postCreate(postCreateInput: PostCreateInput!): PostPayload!
   fileUpload(files: FileUploadInput!): Boolean!
-  # fileUpload(files: [Upload!]!): Boolean!
 }

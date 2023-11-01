@@ -1,6 +1,7 @@
 import { Global, Module } from '@nestjs/common';
-import { LiaraFileStorageService } from './liara-file-storage.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+
+import { LiaraFileStorageService } from './liara-file-storage.service';
 
 @Global()
 @Module({

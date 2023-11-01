@@ -7,8 +7,6 @@ import { ErrorCode } from 'src/types/error.types';
 import { UsersService } from 'src/users/users.service';
 import { Upload } from './dto/post-create-files-input';
 import { CustomError } from 'src/errors/custom-error';
-import { FileType } from 'prisma/prisma-client';
-import { getFileFormat, getFileType } from './utils/file.utils';
 
 interface ICreatePostParam {
   title: string;
@@ -71,17 +69,13 @@ export class PostsService {
     });
 
     if (!post) {
-      // throw new GraphQLError(`Post with id: ${id} not found.`, {
-      //   extensions: { code: ErrorCode.NOT_FOUND_ERROR },
-      // });
       const customError = new CustomError(`Post with id: ${id} not found`, {
         code: ErrorCode.NOT_FOUND_ERROR,
       });
-      // @ts-ignore
-      // customError.code = ErrorCode.NOT_FOUND_ERROR;
+
       throw customError;
     }
-    console.log(post);
+
     return {
       ...post,
       image: post.images[0].url,

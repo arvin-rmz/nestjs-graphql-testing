@@ -1,4 +1,4 @@
-import { Field, InputType } from '@nestjs/graphql';
+import {  InputType } from '@nestjs/graphql';
 import { IsString, IsNotEmpty } from 'class-validator';
 import { Exclude } from 'class-transformer';
 

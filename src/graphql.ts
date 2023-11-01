@@ -186,5 +186,4 @@ export class UserPayload {
 }
 
 export type Upload = any;
-export type PostResult = Post | UserError;
 type Nullable<T> = T | null;

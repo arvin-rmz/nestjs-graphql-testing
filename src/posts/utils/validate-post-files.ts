@@ -1,7 +1,8 @@
+import { ReadStream } from 'fs';
+
 import { BadRequestError } from 'src/errors/bad-request.error';
 import { Upload } from '../dto/post-create-files-input';
 import { allowedDocumentsFormats, allowedFilesFormats } from './post.constants';
-import { ReadStream } from 'fs';
 
 export const validatePostFiles = async (files: Upload[]) => {
   if (typeof files === 'undefined') return;
@@ -75,7 +76,6 @@ export const validatePostFileSize = async (
         fileSizeInBytes += data.length;
       })
       .on('end', () => {
-        // console.log(Math.round(fileSizeInBytes / 1024), 'fileBytesss');
         resolve(fileSizeInBytes <= allowedFileSizeInBytes);
       })
       .on('error', (err) => {

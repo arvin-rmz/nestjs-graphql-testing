@@ -1,5 +1,4 @@
 import { ReadStream } from 'fs';
-import { Stream } from 'stream';
 
 class File {
   filename: string;

@@ -1,4 +1,5 @@
 import { FileType } from 'prisma/prisma-client';
+
 import {
   allowedDocumentsFormats,
   allowedImagesFormats,

@@ -6,10 +6,11 @@ import {
 } from '@aws-sdk/client-s3';
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
+import { FileType } from 'prisma/prisma-client';
+
 import { CustomError } from 'src/errors/custom-error';
 import { ErrorCode } from 'src/types/error.types';
 import { getFileType } from 'src/posts/utils/file.utils';
-import { FileType } from 'prisma/prisma-client';
 
 interface IUploadedFiles {
   index: number;
