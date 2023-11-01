@@ -51,16 +51,12 @@ export class PostsResolver {
   ) {
     const currentUserId = Number(currentUser.sub);
 
-    try {
-      await validatePostFiles(files);
+    await validatePostFiles(files);
 
-      return this.postService.create(
-        { ...postCreateInput, files: files || [] },
-        currentUserId,
-      );
-    } catch (error) {
-      console.log(error, 'postCreate Mutation');
-    }
+    return this.postService.create(
+      { ...postCreateInput, files: files },
+      currentUserId,
+    );
   }
 
   // @Mutation('postCreate')
@@ -75,7 +71,6 @@ export class PostsResolver {
 
   //   return this.postService.create(postCreateInput, currentUserId);
   // }
-
   @Mutation('fileUpload')
   async fileUpload(
     @Args('files') postCreateInput: any,

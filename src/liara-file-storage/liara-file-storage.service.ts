@@ -33,6 +33,8 @@ export class LiaraFileStorageService {
   }
 
   async uploadFiles(files: any[]) {
+    if (!files) return;
+
     const uploadedFilesList: IUploadedFiles[] = [];
 
     const uploadFilesPromises = files.map(async (file: any, index) => {

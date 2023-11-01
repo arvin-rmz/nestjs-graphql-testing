@@ -13,7 +13,7 @@ import { getFileFormat, getFileType } from './utils/file.utils';
 interface ICreatePostParam {
   title: string;
   content: string;
-  files: Upload[];
+  files?: Upload[];
 }
 
 @Injectable()
@@ -28,36 +28,32 @@ export class PostsService {
   async create(createPostParam: ICreatePostParam, currentUserId: number) {
     const { title, content, files } = createPostParam;
 
-    try {
-      const post = await this.prisma.post.create({
-        data: {
-          title: title,
-          content: content,
-          userId: currentUserId,
-        },
-      });
+    const post = await this.prisma.post.create({
+      data: {
+        title: title,
+        content: content,
+        userId: currentUserId,
+      },
+    });
 
-      const uploadedFilesList = await this.liaraFileStorage.uploadFiles(files);
+    const uploadedFilesList = await this.liaraFileStorage.uploadFiles(files);
 
-      const filesToCreate = uploadedFilesList.map((uploadedFile) => ({
-        url: this._createPostImageUrl(uploadedFile.path),
-        index: uploadedFile.index,
-        postId: post.id,
-        type: uploadedFile.fileType,
+    const filesToCreate = uploadedFilesList?.map((uploadedFile) => ({
+      url: this._createPostImageUrl(uploadedFile.path),
+      index: uploadedFile.index,
+      postId: post.id,
+      type: uploadedFile.fileType,
+    }));
+
+    filesToCreate &&
+      (await this.prisma.file.createMany({
+        data: filesToCreate,
       }));
 
-      const createdFiles = await this.prisma.file.createMany({
-        data: filesToCreate,
-      });
-
-      return {
-        userErrors: [],
-        post,
-      };
-    } catch (error) {
-      console.log(error);
-      throw error;
-    }
+    return {
+      userErrors: [],
+      post,
+    };
   }
 
   async findOne(id: number) {
